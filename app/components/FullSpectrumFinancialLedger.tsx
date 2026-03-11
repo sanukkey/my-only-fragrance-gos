@@ -2,7 +2,9 @@
 
 import { useMemo } from "react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend, Cell } from "recharts";
-import { AlertTriangle, Building2, Store, TrendingUp, Wallet } from "lucide-react";
+import { AlertTriangle, Building2, Store, TrendingUp, Wallet, Target } from "lucide-react";
+import type { TargetSet } from "../types/sales";
+import { achievementBarClass, achievementTextClass } from "../types/sales";
 import {
   GROSS_MARGIN_RATE,
   STORE_LABOR_RATIO,
@@ -162,9 +164,11 @@ function buildStoreRows(storeList: StoreInput[], grossMarginRatePct: number): St
 export default function FullSpectrumFinancialLedger({
   grossMarginRate = GROSS_MARGIN_RATE,
   storeList,
+  targets,
 }: {
   grossMarginRate?: number;
   storeList?: StoreInput[];
+  targets?: TargetSet;
 }) {
   const storeRows = useMemo(
     () => (storeList && storeList.length > 0 ? buildStoreRows(storeList, grossMarginRate) : []),
@@ -277,6 +281,68 @@ export default function FullSpectrumFinancialLedger({
         </p>
       </div>
 
+      {/* 0. 年間目標進捗バナー（targets が渡された場合のみ表示） */}
+      {targets && (() => {
+        const totalMonthlyTarget = targets.storeTargets.reduce((a, t) => a + t.monthlySalesTarget, 0);
+        const monthlyActual = storeRows.reduce((a, s) => a + s.sales, 0);
+        const monthlyRate = totalMonthlyTarget > 0 ? (monthlyActual / totalMonthlyTarget) * 100 : 0;
+        const annualPace = monthlyActual * 12;
+        const annualRate = targets.annualTarget.annualSalesTarget > 0
+          ? (annualPace / targets.annualTarget.annualSalesTarget) * 100
+          : 0;
+        return (
+          <div className="bg-cream rounded-2xl border border-champagneLight/50 card-shadow overflow-hidden">
+            <div className="p-4 md:p-6 border-b border-champagneLight/30 bg-champagneLight/10">
+              <h3 className="font-sans font-semibold text-warmInk flex items-center gap-2">
+                <Target size={18} className="text-champagne" />
+                目標進捗サマリー（月次 / 年間）
+              </h3>
+            </div>
+            <div className="p-4 md:p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* 全社月次 */}
+              <div>
+                <p className="font-sans text-xs font-medium text-warmMuted uppercase tracking-wider mb-2">全社月次売上達成率</p>
+                <div className="flex items-baseline gap-2 mb-2">
+                  <span className={`font-sans text-2xl font-bold tabular-nums ${achievementTextClass(monthlyRate)}`}>
+                    {monthlyRate.toFixed(1)} %
+                  </span>
+                  <span className="font-sans text-sm text-warmMuted">
+                    実績 {monthlyActual.toLocaleString("ja-JP")} 万円 / 目標 {totalMonthlyTarget.toLocaleString("ja-JP")} 万円
+                  </span>
+                </div>
+                <div className="h-3 bg-champagneLight/40 rounded-full overflow-hidden">
+                  <div
+                    className={`h-full rounded-full transition-all duration-700 ${achievementBarClass(monthlyRate)}`}
+                    style={{ width: `${Math.min(100, monthlyRate)}%` }}
+                  />
+                </div>
+              </div>
+              {/* 年間ペース */}
+              <div>
+                <p className="font-sans text-xs font-medium text-warmMuted uppercase tracking-wider mb-2">年間売上目標 達成ペース</p>
+                <div className="flex items-baseline gap-2 mb-2">
+                  <span className={`font-sans text-2xl font-bold tabular-nums ${achievementTextClass(annualRate)}`}>
+                    {annualRate.toFixed(1)} %
+                  </span>
+                  <span className="font-sans text-sm text-warmMuted">
+                    ペース {annualPace.toLocaleString("ja-JP")} 万円 / 目標 {targets.annualTarget.annualSalesTarget.toLocaleString("ja-JP")} 万円
+                  </span>
+                </div>
+                <div className="h-3 bg-champagneLight/40 rounded-full overflow-hidden">
+                  <div
+                    className={`h-full rounded-full transition-all duration-700 ${achievementBarClass(annualRate)}`}
+                    style={{ width: `${Math.min(100, annualRate)}%` }}
+                  />
+                </div>
+              </div>
+            </div>
+            <p className="font-sans text-[10px] text-warmMuted/80 px-4 pb-3">
+              年間ペース = 今月実績 × 12。Edit Mode で目標値を更新できます。
+            </p>
+          </div>
+        );
+      })()}
+
       {/* 1. 店舗別経費・経費率 */}
       <div className="bg-cream rounded-2xl border border-champagneLight/50 card-shadow overflow-hidden">
         <div className="p-4 md:p-6 border-b border-champagneLight/50">
@@ -291,6 +357,8 @@ export default function FullSpectrumFinancialLedger({
               <tr className="bg-champagneLight/20 border-b border-champagneLight/50">
                 <th className="text-left py-3 px-3 font-semibold text-warmInk whitespace-nowrap">店舗</th>
                 <th className="text-right py-3 px-3 font-semibold text-warmInk whitespace-nowrap">売上</th>
+                {targets && <th className="text-right py-3 px-3 font-semibold text-warmInk whitespace-nowrap">月次目標</th>}
+                {targets && <th className="text-center py-3 px-3 font-semibold text-warmInk whitespace-nowrap min-w-[120px]">達成率</th>}
                 <th className="text-right py-3 px-3 font-semibold text-warmInk whitespace-nowrap">人件費</th>
                 <th className="text-right py-3 px-3 font-semibold text-warmInk whitespace-nowrap">備品代</th>
                 <th className="text-right py-3 px-3 font-semibold text-warmInk whitespace-nowrap">光熱費</th>
@@ -312,6 +380,31 @@ export default function FullSpectrumFinancialLedger({
                   <tr key={s.id} className="border-b border-champagneLight/30 hover:bg-champagneLight/10">
                     <td className="py-2.5 px-3 font-medium text-warmInk whitespace-nowrap">{s.name}</td>
                     <td className="py-2.5 px-3 text-right tabular-nums text-warmInk">{s.sales.toLocaleString("ja-JP")}</td>
+                    {targets && (() => {
+                      const storeTarget = targets.storeTargets.find((t) => t.storeId === s.id);
+                      const tgt = storeTarget?.monthlySalesTarget ?? s.sales;
+                      const rate = tgt > 0 ? (s.sales / tgt) * 100 : 0;
+                      return (
+                        <>
+                          <td className="py-2.5 px-3 text-right tabular-nums text-warmMuted whitespace-nowrap">
+                            {tgt.toLocaleString("ja-JP")}
+                          </td>
+                          <td className="py-2.5 px-3">
+                            <div className="flex items-center gap-2 min-w-[112px]">
+                              <div className="flex-1 h-2 bg-champagneLight/40 rounded-full overflow-hidden">
+                                <div
+                                  className={`h-full rounded-full ${achievementBarClass(rate)}`}
+                                  style={{ width: `${Math.min(100, rate)}%` }}
+                                />
+                              </div>
+                              <span className={`font-sans text-xs font-semibold tabular-nums shrink-0 ${achievementTextClass(rate)}`}>
+                                {rate.toFixed(1)}%
+                              </span>
+                            </div>
+                          </td>
+                        </>
+                      );
+                    })()}
                     <td className="py-2.5 px-3 text-right tabular-nums text-warmMuted">{s.labor.toLocaleString("ja-JP")}</td>
                     <td className="py-2.5 px-3 text-right tabular-nums text-warmMuted">{s.supplies.toLocaleString("ja-JP")}</td>
                     <td className="py-2.5 px-3 text-right tabular-nums text-warmMuted">{s.utilities.toLocaleString("ja-JP")}</td>
@@ -336,6 +429,31 @@ export default function FullSpectrumFinancialLedger({
                 <td className="py-3 px-3 text-right tabular-nums text-warmInk">
                   {storeRows.reduce((a, s) => a + s.sales, 0).toLocaleString("ja-JP")}
                 </td>
+                {targets && (() => {
+                  const totalTarget = targets.storeTargets.reduce((a, t) => a + t.monthlySalesTarget, 0);
+                  const totalActual = storeRows.reduce((a, s) => a + s.sales, 0);
+                  const totalRate = totalTarget > 0 ? (totalActual / totalTarget) * 100 : 0;
+                  return (
+                    <>
+                      <td className="py-3 px-3 text-right tabular-nums text-warmInk">
+                        {totalTarget.toLocaleString("ja-JP")}
+                      </td>
+                      <td className="py-3 px-3">
+                        <div className="flex items-center gap-2 min-w-[112px]">
+                          <div className="flex-1 h-2 bg-champagneLight/40 rounded-full overflow-hidden">
+                            <div
+                              className={`h-full rounded-full ${achievementBarClass(totalRate)}`}
+                              style={{ width: `${Math.min(100, totalRate)}%` }}
+                            />
+                          </div>
+                          <span className={`font-sans text-xs font-bold tabular-nums shrink-0 ${achievementTextClass(totalRate)}`}>
+                            {totalRate.toFixed(1)}%
+                          </span>
+                        </div>
+                      </td>
+                    </>
+                  );
+                })()}
                 <td className="py-3 px-3 text-right tabular-nums">{storeRows.reduce((a, s) => a + s.labor, 0).toLocaleString("ja-JP")}</td>
                 <td className="py-3 px-3 text-right tabular-nums">{storeRows.reduce((a, s) => a + s.supplies, 0).toLocaleString("ja-JP")}</td>
                 <td className="py-3 px-3 text-right tabular-nums">{storeRows.reduce((a, s) => a + s.utilities, 0).toLocaleString("ja-JP")}</td>

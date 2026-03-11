@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useMemo } from "react";
-import { AlertTriangle, Package, Users, Link2, PenLine, TrendingDown, Clock, BarChart3, Settings, CheckCircle2, Star, Heart, Smile, Zap, Send, BookOpen, MessageSquare, Shield, Sparkles, Mic, FileText, GraduationCap, Bell } from "lucide-react";
+import { useState, useMemo, useEffect, useCallback } from "react";
+import { AlertTriangle, Package, Users, Link2, PenLine, TrendingDown, Clock, BarChart3, Settings, CheckCircle2, Star, Heart, Smile, Zap, Send, BookOpen, MessageSquare, Shield, Sparkles, Mic, FileText, GraduationCap, Bell, Target, RefreshCw } from "lucide-react";
 import StrategicManagementLedger from "./StrategicManagementLedger";
 import FullSpectrumFinancialLedger from "./FullSpectrumFinancialLedger";
 import {
@@ -33,6 +33,9 @@ import {
   LTV_CAC_RATIO,
   LTV_CAC_HEALTHY_THRESHOLD,
 } from "../lib/financeConstants";
+import { DEFAULT_TARGET_SET, TARGETS_STORAGE_KEY } from "../lib/targetDefaults";
+import type { TargetSet, AnnualCorporateTarget } from "../types/sales";
+import { achievementBarClass, achievementTextClass } from "../types/sales";
 /** 前週比（%）の閾値。これを下回るとリスク・アラートで赤表示。 */
 const WOW_ALERT_THRESHOLD = -5;
 
@@ -257,6 +260,46 @@ type LearningStatus = "pending" | "watched";
 export default function Dashboard() {
   const [editMode, setEditMode] = useState(false);
   const [apiStatusOpen, setApiStatusOpen] = useState(false);
+
+  // ========== 目標管理 (Target Management) ==========
+  const [targets, setTargets] = useState<TargetSet>(() => {
+    if (typeof window === "undefined") return DEFAULT_TARGET_SET;
+    try {
+      const saved = localStorage.getItem(TARGETS_STORAGE_KEY);
+      return saved ? (JSON.parse(saved) as TargetSet) : DEFAULT_TARGET_SET;
+    } catch {
+      return DEFAULT_TARGET_SET;
+    }
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(TARGETS_STORAGE_KEY, JSON.stringify(targets));
+    } catch {}
+  }, [targets]);
+
+  const updateStoreTarget = useCallback((storeId: string, newTarget: number) => {
+    setTargets((prev) => ({
+      ...prev,
+      storeTargets: prev.storeTargets.map((t) =>
+        t.storeId === storeId ? { ...t, monthlySalesTarget: newTarget } : t
+      ),
+    }));
+  }, []);
+
+  const updateAnnualTarget = useCallback(
+    (field: keyof AnnualCorporateTarget, value: number) => {
+      setTargets((prev) => ({
+        ...prev,
+        annualTarget: { ...prev.annualTarget, [field]: value },
+      }));
+    },
+    []
+  );
+
+  const resetTargets = useCallback(() => {
+    setTargets(DEFAULT_TARGET_SET);
+  }, []);
   /** 店舗別 教育コンテンツの学習進捗（未視聴 → 視聴済み） */
   const [learningProgress, setLearningProgress] = useState<Record<string, LearningStatus>>({});
   /** フィードバック報告フォーム: 表示可否・店舗・手応え・実績メモ */
@@ -1318,6 +1361,29 @@ export default function Dashboard() {
                   <span>売上</span>
                   <span className="text-warmInk font-medium font-sans">{store.sales.toLocaleString("ja-JP")} 万円</span>
                 </div>
+                {/* 月次目標達成率 */}
+                {(() => {
+                  const storeTarget = targets.storeTargets.find((t) => t.storeId === store.id);
+                  const tgt = storeTarget?.monthlySalesTarget ?? store.sales;
+                  const rate = tgt > 0 ? (store.sales / tgt) * 100 : 0;
+                  return (
+                    <div>
+                      <div className="flex justify-between mb-0.5">
+                        <span>月次目標達成率</span>
+                        <span className={`font-semibold tabular-nums ${achievementTextClass(rate)}`}>
+                          {rate.toFixed(1)} %
+                        </span>
+                      </div>
+                      <div className="h-1.5 bg-champagneLight/40 rounded-full overflow-hidden">
+                        <div
+                          className={`h-full rounded-full transition-all duration-500 ${achievementBarClass(rate)}`}
+                          style={{ width: `${Math.min(100, rate)}%` }}
+                        />
+                      </div>
+                      <p className="text-warmMuted/70 mt-0.5">目標 {tgt.toLocaleString("ja-JP")} 万円</p>
+                    </div>
+                  );
+                })()}
                 <div className="flex justify-between">
                   <span>客単価</span>
                   <span className="text-warmInk font-medium font-sans">{(store.avgOrder / 10000).toFixed(1)} 万</span>
@@ -1374,8 +1440,223 @@ export default function Dashboard() {
         <StrategicManagementLedger />
       </div>
 
+      {/* ========== 目標管理・達成進捗（Target & Achievement Management） ========== */}
       <div className="w-full max-w-6xl mx-auto px-4">
-        <FullSpectrumFinancialLedger grossMarginRate={displayMarginRate} storeList={STORES} />
+        <div className="bg-cream rounded-2xl border border-champagneLight/50 card-shadow overflow-hidden">
+          {/* ヘッダー */}
+          <div className="p-4 md:p-6 border-b border-champagneLight/50 bg-champagneLight/10">
+            <h2 className="font-sans text-xl font-semibold text-warmInk flex items-center gap-2">
+              <Target size={22} className="text-champagne" />
+              目標管理・達成進捗（Target & Achievement Management）
+            </h2>
+            <p className="font-sans text-sm text-warmMuted mt-1">
+              店舗別の月次目標と全社年間目標を設定し、実績との対比・達成率を一元管理します。
+            </p>
+            {editMode && (
+              <div className="mt-3 flex items-center gap-3 flex-wrap">
+                <span className="inline-flex items-center gap-1.5 font-sans text-xs font-medium text-champagne bg-champagneLight/40 px-3 py-1.5 rounded-lg border border-champagne/30">
+                  <PenLine size={12} />
+                  目標値を直接入力して更新できます
+                </span>
+                <button
+                  type="button"
+                  onClick={resetTargets}
+                  className="inline-flex items-center gap-1.5 font-sans text-xs text-warmMuted hover:text-warmInk border border-champagneLight/60 px-3 py-1.5 rounded-lg hover:bg-champagneLight/30 transition-silent"
+                >
+                  <RefreshCw size={12} />
+                  デフォルトに戻す
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* 全社年間目標カード */}
+          <div className="p-4 md:p-6 border-b border-champagneLight/30">
+            <h3 className="font-sans text-sm font-semibold text-warmMuted uppercase tracking-wider mb-4">全社年間目標</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              {/* 年間売上目標 */}
+              <div className="rounded-xl bg-offwhite border border-champagneLight/50 p-4">
+                <p className="font-sans text-xs font-medium text-warmMuted uppercase tracking-wider">年間売上目標</p>
+                {editMode ? (
+                  <input
+                    type="number"
+                    value={targets.annualTarget.annualSalesTarget}
+                    onChange={(e) => updateAnnualTarget("annualSalesTarget", Number(e.target.value) || 0)}
+                    className="font-sans text-xl font-semibold text-warmInk w-full mt-2 py-2.5 px-3 bg-cream border-2 border-champagneLight rounded-xl tabular-nums focus:outline-none focus:ring-2 focus:ring-champagne/40 focus:border-champagne"
+                  />
+                ) : (
+                  <p className="font-sans text-2xl font-bold text-warmInk mt-1 tabular-nums">
+                    {targets.annualTarget.annualSalesTarget.toLocaleString("ja-JP")} 万円
+                  </p>
+                )}
+                {(() => {
+                  const annualPace = displaySales * 12;
+                  const rate = targets.annualTarget.annualSalesTarget > 0
+                    ? (annualPace / targets.annualTarget.annualSalesTarget) * 100
+                    : 0;
+                  return (
+                    <div className="mt-3">
+                      <div className="flex justify-between items-center font-sans text-xs mb-1.5">
+                        <span className="text-warmMuted">年間ペース（月次×12）: {annualPace.toLocaleString("ja-JP")} 万円</span>
+                        <span className={`font-semibold tabular-nums ${achievementTextClass(rate)}`}>{rate.toFixed(1)} %</span>
+                      </div>
+                      <div className="h-2 bg-champagneLight/40 rounded-full overflow-hidden">
+                        <div
+                          className={`h-full rounded-full transition-all duration-700 ${achievementBarClass(rate)}`}
+                          style={{ width: `${Math.min(100, rate)}%` }}
+                        />
+                      </div>
+                    </div>
+                  );
+                })()}
+              </div>
+
+              {/* 年間利益目標 */}
+              <div className="rounded-xl bg-offwhite border border-champagneLight/50 p-4">
+                <p className="font-sans text-xs font-medium text-warmMuted uppercase tracking-wider">年間利益目標（Real Net Profit）</p>
+                {editMode ? (
+                  <input
+                    type="number"
+                    value={targets.annualTarget.annualProfitTarget}
+                    onChange={(e) => updateAnnualTarget("annualProfitTarget", Number(e.target.value) || 0)}
+                    className="font-sans text-xl font-semibold text-warmInk w-full mt-2 py-2.5 px-3 bg-cream border-2 border-champagneLight rounded-xl tabular-nums focus:outline-none focus:ring-2 focus:ring-champagne/40 focus:border-champagne"
+                  />
+                ) : (
+                  <p className="font-sans text-2xl font-bold text-warmInk mt-1 tabular-nums">
+                    {targets.annualTarget.annualProfitTarget.toLocaleString("ja-JP")} 万円
+                  </p>
+                )}
+                {(() => {
+                  const annualProfitPace = displayGrossProfit * 12;
+                  const rate = targets.annualTarget.annualProfitTarget > 0
+                    ? (annualProfitPace / targets.annualTarget.annualProfitTarget) * 100
+                    : 0;
+                  return (
+                    <div className="mt-3">
+                      <div className="flex justify-between items-center font-sans text-xs mb-1.5">
+                        <span className="text-warmMuted">粗利ペース（月次×12）: {annualProfitPace.toLocaleString("ja-JP")} 万円</span>
+                        <span className={`font-semibold tabular-nums ${achievementTextClass(rate)}`}>{rate.toFixed(1)} %</span>
+                      </div>
+                      <div className="h-2 bg-champagneLight/40 rounded-full overflow-hidden">
+                        <div
+                          className={`h-full rounded-full transition-all duration-700 ${achievementBarClass(rate)}`}
+                          style={{ width: `${Math.min(100, rate)}%` }}
+                        />
+                      </div>
+                      <p className="font-sans text-[10px] text-warmMuted/80 mt-1">※ 粗利（Gross Profit）をベースに試算。Real Net Profit は財務台帳で確認できます。</p>
+                    </div>
+                  );
+                })()}
+              </div>
+            </div>
+          </div>
+
+          {/* 全社月次達成率サマリー */}
+          {(() => {
+            const totalMonthlyTarget = targets.storeTargets.reduce((a, t) => a + t.monthlySalesTarget, 0);
+            const monthlyRate = totalMonthlyTarget > 0 ? (displaySales / totalMonthlyTarget) * 100 : 0;
+            return (
+              <div className="p-4 md:p-6 border-b border-champagneLight/30 bg-champagneLight/5">
+                <h3 className="font-sans text-sm font-semibold text-warmMuted uppercase tracking-wider mb-4">全社月次達成率</h3>
+                <div className="flex flex-wrap items-end gap-6 mb-4">
+                  <div>
+                    <p className="font-sans text-xs text-warmMuted">月次目標（全店合計）</p>
+                    <p className="font-sans text-2xl font-bold text-warmInk tabular-nums mt-0.5">
+                      {totalMonthlyTarget.toLocaleString("ja-JP")} 万円
+                    </p>
+                  </div>
+                  <span className="font-sans text-warmMuted text-xl mb-1">vs</span>
+                  <div>
+                    <p className="font-sans text-xs text-warmMuted">今月実績</p>
+                    <p className="font-sans text-2xl font-bold text-champagne tabular-nums mt-0.5">
+                      {displaySales.toLocaleString("ja-JP")} 万円
+                    </p>
+                  </div>
+                  <div className="ml-auto text-right">
+                    <p className="font-sans text-xs text-warmMuted">達成率</p>
+                    <p className={`font-sans text-3xl font-bold tabular-nums mt-0.5 ${achievementTextClass(monthlyRate)}`}>
+                      {monthlyRate.toFixed(1)} %
+                    </p>
+                  </div>
+                </div>
+                <div className="h-3 bg-champagneLight/40 rounded-full overflow-hidden">
+                  <div
+                    className={`h-full rounded-full transition-all duration-700 ${achievementBarClass(monthlyRate)}`}
+                    style={{ width: `${Math.min(100, monthlyRate)}%` }}
+                  />
+                </div>
+                <p className="font-sans text-[10px] text-warmMuted/80 mt-2">
+                  {monthlyRate >= 100 ? "✓ 全社月次目標を達成しています。" : monthlyRate >= 80 ? "⚡ 目標の80%以上。あと一歩で達成。" : "⚠ 目標達成まで要注力。店舗別内訳を確認してください。"}
+                </p>
+              </div>
+            );
+          })()}
+
+          {/* 店舗別 月次目標 vs 実績 */}
+          <div className="p-4 md:p-6">
+            <h3 className="font-sans text-sm font-semibold text-warmMuted uppercase tracking-wider mb-4 flex items-center gap-2">
+              店舗別 月次目標 vs 実績
+              {editMode && (
+                <span className="font-sans text-xs font-normal text-champagne bg-champagneLight/40 px-2 py-0.5 rounded">
+                  目標値を直接入力
+                </span>
+              )}
+            </h3>
+            <div className="space-y-4">
+              {STORES.map((store) => {
+                const storeTarget = targets.storeTargets.find((t) => t.storeId === store.id);
+                const tgt = storeTarget?.monthlySalesTarget ?? store.sales;
+                const rate = tgt > 0 ? (store.sales / tgt) * 100 : 0;
+                return (
+                  <div key={store.id} className="flex items-center gap-3">
+                    <span className="font-sans text-sm font-medium text-warmInk w-32 shrink-0 truncate">
+                      {store.name}
+                    </span>
+                    <div className="flex-1">
+                      <div className="flex justify-between items-center font-sans text-xs mb-1.5">
+                        {editMode ? (
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="text-warmMuted">目標:</span>
+                            <input
+                              type="number"
+                              value={tgt}
+                              onChange={(e) => updateStoreTarget(store.id, Number(e.target.value) || 0)}
+                              className="font-sans text-sm text-warmInk w-24 py-1 px-2 bg-offwhite border-2 border-champagneLight rounded-lg tabular-nums focus:outline-none focus:ring-2 focus:ring-champagne/40 focus:border-champagne"
+                            />
+                            <span className="text-warmMuted">万円</span>
+                            <span className="text-warmMuted/70 ml-1">
+                              実績: {store.sales.toLocaleString("ja-JP")} 万円
+                            </span>
+                          </div>
+                        ) : (
+                          <span className="text-warmMuted">
+                            目標 {tgt.toLocaleString("ja-JP")} 万円 / 実績 {store.sales.toLocaleString("ja-JP")} 万円
+                          </span>
+                        )}
+                        <span className={`font-semibold tabular-nums ml-2 shrink-0 ${achievementTextClass(rate)}`}>
+                          {rate.toFixed(1)} %
+                        </span>
+                      </div>
+                      <div className="h-2 bg-champagneLight/40 rounded-full overflow-hidden">
+                        <div
+                          className={`h-full rounded-full transition-all duration-500 ${achievementBarClass(rate)}`}
+                          style={{ width: `${Math.min(100, rate)}%` }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            <p className="font-sans text-[10px] text-warmMuted/80 mt-6">
+              緑 = 達成（100%以上）/ 黄 = 80〜99% / 赤 = 80%未満。目標は Edit Mode でいつでも更新可能です。localStorage に自動保存されます。
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div className="w-full max-w-6xl mx-auto px-4">
+        <FullSpectrumFinancialLedger grossMarginRate={displayMarginRate} storeList={STORES} targets={targets} />
       </div>
     </div>
   );
