@@ -1,0 +1,63 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --offwhite: #faf8f5;
+  --cream: #fffef9;
+  --champagne: #c9a962;
+  --warm-ink: #2c2415;
+}
+
+body {
+  background-color: var(--offwhite);
+  color: var(--warm-ink);
+}
+
+/* 静寂感のある余白とトランジション */
+.transition-silent {
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+/* 高品質なプロダクトを扱う誇りを感じさせる、柔らかいシャドウ */
+.card-shadow {
+  box-shadow: 0 1px 3px rgba(44, 36, 21, 0.06);
+}
+
+.card-shadow-hover:hover {
+  box-shadow: 0 6px 20px rgba(201, 169, 98, 0.12);
+}
+
+/* 横スクロール領域：スクロールバーを常時薄く表示し、右端に「続きあり」の影 */
+.scroll-area-hint {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(201, 169, 98, 0.5) transparent;
+}
+.scroll-area-hint::-webkit-scrollbar {
+  height: 8px;
+}
+.scroll-area-hint::-webkit-scrollbar-track {
+  background: rgba(245, 237, 228, 0.8);
+  border-radius: 4px;
+}
+.scroll-area-hint::-webkit-scrollbar-thumb {
+  background: rgba(201, 169, 98, 0.4);
+  border-radius: 4px;
+}
+.scroll-area-hint::-webkit-scrollbar-thumb:hover {
+  background: rgba(201, 169, 98, 0.6);
+}
+.scroll-area-hint-wrap {
+  position: relative;
+}
+.scroll-area-hint-wrap::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 8px;
+  width: 24px;
+  background: linear-gradient(to left, rgba(255, 254, 249, 0.95), transparent);
+  pointer-events: none;
+  border-radius: 0 12px 12px 0;
+}
