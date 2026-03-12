@@ -53,3 +53,62 @@ export function achievementTextClass(rate: number): string {
   if (rate >= 80) return "text-amber-600";
   return "text-rose-600";
 }
+
+/** 店舗別4KPI月次目標（客単価・予約充足率・リピート意向率） */
+export type StoreKpiTargets = {
+  storeId: string;
+  /** 客単価目標（円） */
+  avgOrderTarget: number;
+  /** 予約充足率目標（%） */
+  fillRateTarget: number;
+  /** リピート意向率目標（%） */
+  repeatRateTarget: number;
+};
+
+/** 達成ステータスラベル */
+export type GoalStatus = "excellent" | "on_track" | "growth_opportunity";
+
+/** 達成率からステータスを返す */
+export function getGoalStatus(rate: number): GoalStatus {
+  if (rate >= 100) return "excellent";
+  if (rate >= 90) return "on_track";
+  return "growth_opportunity";
+}
+
+/** ステータスのラベル文字列 */
+export function getGoalStatusLabel(status: GoalStatus): string {
+  switch (status) {
+    case "excellent": return "Excellent System Implementation";
+    case "on_track": return "On Track";
+    case "growth_opportunity": return "Growth Opportunity";
+  }
+}
+
+/** ステータスのTailwindバッジクラス */
+export function getGoalStatusBadgeClass(status: GoalStatus): string {
+  switch (status) {
+    case "excellent": return "bg-emerald-100 text-emerald-800 border border-emerald-300";
+    case "on_track": return "bg-sky-100 text-sky-800 border border-sky-300";
+    case "growth_opportunity": return "bg-amber-100 text-amber-800 border border-amber-300";
+  }
+}
+
+/** 月中着地予想 */
+export type MonthProjection = {
+  /** 月末着地予想（万円） */
+  projected: number;
+  /** 不足金額（万円）。正 = 不足、負 = 超過 */
+  shortfall: number;
+};
+
+/** 月中着地予想を計算する純粋関数 */
+export function calcMonthProjection(
+  accumulated: number,
+  target: number,
+  elapsedDays: number,
+  totalDays: number
+): MonthProjection {
+  const daily = elapsedDays > 0 ? accumulated / elapsedDays : 0;
+  const projected = Math.round(daily * totalDays);
+  return { projected, shortfall: target - projected };
+}
