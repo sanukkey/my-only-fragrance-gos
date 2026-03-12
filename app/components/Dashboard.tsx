@@ -48,44 +48,53 @@ const TOTAL_BRAND_TRUST_REVIEWS = 81425;
 const LEGENDARY_REVIEWS_MIN = 10000;
 
 /**
- * 14店舗のリアルな「ドラマ」データ（2026年3月12日 木曜14時時点）
+ * ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ *  TOMMY CRISIS MODE（2026年3月12日）
+ *  全14店舗が月次目標を下回る「経営非常事態」シナリオ。
+ *  達成率 40%〜82%。100%達成ゼロ。経営者が即座に動ける数字。
  *
- * 絶好調（4店）: salesWoW 1.10〜1.18 — 春シーズン・ブランド力全開の旗艦
- * あと一歩（5店）: salesWoW 0.90〜0.98 — 都市部競合で若干ペース遅れ
- * 苦戦中（5店）: salesWoW 0.72〜0.80 — 季節変動・開業途中・観光客減
+ *  目標（monthlySalesTarget）：400〜1,800万・立地傾斜配分
+ *  salesWoW：実績÷目標比率（0.43〜0.82）→ 月末着地予想に直結
+ * ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ *
+ *  🟠 警告（80〜99%）：3店舗  ← かろうじて見えている光
+ *  🔴 危機（〜79%）  ：11店舗 ← 今すぐ対策が必要
  */
 const BASE_STORES = [
-  // ── 絶好調 ─────────────────────────────────────────────────────────────────
-  // 京都寺町: 旗艦中の旗艦。リピーター層が厚く春シーズン全開
-  { id: "kyoto-teramachi", name: "京都 寺町店", sales: 2000, avgOrder: 20200, fillRate: 98, repeatRate: 91, risk: "none", stock: "ok", salesWoW: 1.18, grossProfitWoW: 1.20, rating: 5.0, totalReviews: 17726 },
-  // 清水: インバウンド再開で外国人観光客が急増。週末は満枠
-  { id: "kyoto-kiyomizu", name: "京都 清水店", sales: 1500, avgOrder: 18800, fillRate: 97, repeatRate: 87, risk: "none", stock: "ok", salesWoW: 1.12, grossProfitWoW: 1.14, rating: 5.0, totalReviews: 13722 },
-  // 名古屋栄: 地元VIP客の定期来訪サイクルが絶妙にはまった月
-  { id: "nagoya-sakae", name: "名古屋 栄店", sales: 1000, avgOrder: 21500, fillRate: 96, repeatRate: 88, risk: "none", stock: "ok", salesWoW: 1.15, grossProfitWoW: 1.16, rating: 4.9, totalReviews: 20275 },
-  // 博多: 九州初の旗艦が軌道に乗り始めた。口コミ獲得フェーズ
-  { id: "hakata", name: "博多店", sales: 800, avgOrder: 18200, fillRate: 95, repeatRate: 80, risk: "none", stock: "ok", salesWoW: 1.10, grossProfitWoW: 1.11, rating: 4.9, totalReviews: 1075 },
-  // ── あと一歩 ─────────────────────────────────────────────────────────────
-  // 原宿: 競合ブランドの新規出店で若干の客足分散。週末は戻す見込み
-  { id: "tokyo-harajuku", name: "東京 原宿店", sales: 950, avgOrder: 21200, fillRate: 93, repeatRate: 84, risk: "none", stock: "ok", salesWoW: 0.95, grossProfitWoW: 0.94, rating: 4.9, totalReviews: 10046 },
-  // 梅田: 先週の雨天続きで来客数が落ちた。週後半に巻き返せる
-  { id: "umeda", name: "梅田店", sales: 800, avgOrder: 19800, fillRate: 91, repeatRate: 79, risk: "none", stock: "ok", salesWoW: 0.98, grossProfitWoW: 0.97, rating: 5.0, totalReviews: 1512 },
-  // 河原町: 寺町と客層が重なりつつある。差別化施策を検討中
-  { id: "kyoto-kawaramachi", name: "京都 河原町店", sales: 950, avgOrder: 19200, fillRate: 90, repeatRate: 82, risk: "none", stock: "ok", salesWoW: 0.92, grossProfitWoW: 0.91, rating: 5.0, totalReviews: 4473 },
-  // 横浜: 安定した地盤はあるが単価が伸び悩む。体験の質アップが課題
-  { id: "yokohama", name: "横浜店", sales: 800, avgOrder: 18800, fillRate: 90, repeatRate: 77, risk: "none", stock: "ok", salesWoW: 0.93, grossProfitWoW: 0.92, rating: 4.9, totalReviews: 2233 },
-  // ソラマチ: 平日の観光客がやや少ない。週末カバーに期待
-  { id: "tokyo-soramachi", name: "東京 ソラマチ店", sales: 900, avgOrder: 19500, fillRate: 89, repeatRate: 80, risk: "none", stock: "ok", salesWoW: 0.90, grossProfitWoW: 0.89, rating: 4.9, totalReviews: 3802 },
-  // ── 苦戦中 ─────────────────────────────────────────────────────────────
-  // 産寧坂: 清水店との近接で来客が分散。エリア戦略の見直しが必要
-  { id: "kyoto-sannenzaka", name: "京都 産寧坂店", sales: 900, avgOrder: 18800, fillRate: 84, repeatRate: 74, risk: "watch", stock: "ok", salesWoW: 0.78, grossProfitWoW: 0.77, rating: 5.0, totalReviews: 2269 },
-  // 成田空港: 3月上旬の国際線搭乗客数が想定を下回る季節変動
-  { id: "chiba-narita", name: "千葉 成田空港店", sales: 850, avgOrder: 16500, fillRate: 77, repeatRate: 68, risk: "alert", stock: "ok", salesWoW: 0.72, grossProfitWoW: 0.70, rating: 5.0, totalReviews: 2398 },
-  // 新京極: 春休み前の端境期。来週から修学旅行シーズンで回復見込み
-  { id: "kyoto-shinkyogoku", name: "京都 新京極店", sales: 700, avgOrder: 17800, fillRate: 83, repeatRate: 73, risk: "none", stock: "ok", salesWoW: 0.80, grossProfitWoW: 0.79, rating: 5.0, totalReviews: 1180 },
-  // 飛騨高山: 冬シーズン終了後の谷間。在庫補充遅延も重なる
-  { id: "takayama", name: "飛騨高山店", sales: 750, avgOrder: 17500, fillRate: 79, repeatRate: 70, risk: "watch", stock: "low", salesWoW: 0.75, grossProfitWoW: 0.74, rating: 5.0, totalReviews: 479 },
-  // 金沢: 開業10ヶ月。まだ認知拡大フェーズ。口コミ数が少ない
-  { id: "kanazawa", name: "金沢店", sales: 650, avgOrder: 19200, fillRate: 80, repeatRate: 71, risk: "watch", stock: "ok", salesWoW: 0.74, grossProfitWoW: 0.73, rating: 4.9, totalReviews: 235 },
+  // ─────────────────────────────────────────────────────────────────────────
+  //  🟠 警告ゾーン（80〜82%）— まだ間に合う、しかし油断禁物
+  // ─────────────────────────────────────────────────────────────────────────
+  // 河原町: 達成率82%。地元リピーター底力で最善位。だが目標1,000万に届かない
+  { id: "kyoto-kawaramachi", name: "京都 河原町店", sales: 1000, avgOrder: 19200, fillRate: 79, repeatRate: 71, risk: "none",  stock: "ok",  salesWoW: 0.82, grossProfitWoW: 0.79, rating: 5.0, totalReviews: 4473 },
+  // 名古屋栄: 達成率81%。東海圏VIPは来訪するが来店数が想定の8割
+  { id: "nagoya-sakae",      name: "名古屋 栄店",   sales: 1200, avgOrder: 20500, fillRate: 75, repeatRate: 68, risk: "none",  stock: "ok",  salesWoW: 0.81, grossProfitWoW: 0.78, rating: 4.9, totalReviews: 20275 },
+  // 博多: 達成率80%。九州エリア唯一の旗艦。認知拡大中だがスピード不足
+  { id: "hakata",            name: "博多店",         sales:  600, avgOrder: 17500, fillRate: 77, repeatRate: 70, risk: "none",  stock: "ok",  salesWoW: 0.80, grossProfitWoW: 0.77, rating: 4.9, totalReviews: 1075 },
+  // ─────────────────────────────────────────────────────────────────────────
+  //  🔴 危機ゾーン（〜79%）— 今すぐ動かなければ月次目標未達が確定
+  // ─────────────────────────────────────────────────────────────────────────
+  // 横浜: 達成率70%。競合モール出店の影響で集客が3割減。回収策未定
+  { id: "yokohama",          name: "横浜店",         sales: 1000, avgOrder: 18200, fillRate: 73, repeatRate: 67, risk: "watch", stock: "ok",  salesWoW: 0.70, grossProfitWoW: 0.67, rating: 4.9, totalReviews: 2233 },
+  // 金沢: 達成率68%。開業1年未満で認知度低。客単価は高いが来客数が足りない
+  { id: "kanazawa",          name: "金沢店",          sales:  400, avgOrder: 18500, fillRate: 63, repeatRate: 61, risk: "watch", stock: "ok",  salesWoW: 0.68, grossProfitWoW: 0.65, rating: 4.9, totalReviews: 235 },
+  // ソラマチ: 達成率65%。平日ガラガラ。週末の挽回だけでは目標に届かない
+  { id: "tokyo-soramachi",   name: "東京 ソラマチ店", sales: 1000, avgOrder: 18800, fillRate: 70, repeatRate: 64, risk: "watch", stock: "ok",  salesWoW: 0.65, grossProfitWoW: 0.62, rating: 4.9, totalReviews: 3802 },
+  // 清水: 達成率63%。インバウンド想定外の落ち込み。団体ツアー受入れ減
+  { id: "kyoto-kiyomizu",    name: "京都 清水店",     sales: 1400, avgOrder: 18200, fillRate: 68, repeatRate: 62, risk: "watch", stock: "ok",  salesWoW: 0.63, grossProfitWoW: 0.60, rating: 4.9, totalReviews: 13722 },
+  // 梅田: 達成率61%。大阪万博プレ特需に乗れず。隣接競合が先手を打った
+  { id: "umeda",             name: "梅田店",          sales: 1200, avgOrder: 19200, fillRate: 66, repeatRate: 60, risk: "watch", stock: "ok",  salesWoW: 0.61, grossProfitWoW: 0.58, rating: 4.9, totalReviews: 1512 },
+  // 成田空港: 達成率57%。国際線便数回復遅延。免税需要の取り込み失敗
+  { id: "chiba-narita",      name: "千葉 成田空港店", sales:  800, avgOrder: 15800, fillRate: 55, repeatRate: 53, risk: "alert", stock: "low", salesWoW: 0.57, grossProfitWoW: 0.54, rating: 4.9, totalReviews: 2398 },
+  // 寺町: 達成率55%。旗艦店なのに最大の危機。スタッフ離職で体験品質が急落
+  { id: "kyoto-teramachi",   name: "京都 寺町店",     sales: 1800, avgOrder: 19200, fillRate: 72, repeatRate: 65, risk: "alert", stock: "ok",  salesWoW: 0.55, grossProfitWoW: 0.52, rating: 4.8, totalReviews: 17726 },
+  // 新京極: 達成率53%。通行量はあるが来店率が低い。入口導線の課題
+  { id: "kyoto-shinkyogoku", name: "京都 新京極店",   sales:  600, avgOrder: 17200, fillRate: 61, repeatRate: 56, risk: "watch", stock: "ok",  salesWoW: 0.53, grossProfitWoW: 0.50, rating: 4.9, totalReviews: 1180 },
+  // 原宿: 達成率48%。SNS炎上の余波が続く。若年客の離反が加速中
+  { id: "tokyo-harajuku",    name: "東京 原宿店",     sales: 1800, avgOrder: 20000, fillRate: 62, repeatRate: 58, risk: "alert", stock: "ok",  salesWoW: 0.48, grossProfitWoW: 0.45, rating: 4.8, totalReviews: 10046 },
+  // 高山: 達成率45%。観光シーズン外。在庫補充遅延が追い打ち
+  { id: "takayama",          name: "飛騨高山店",      sales:  400, avgOrder: 16500, fillRate: 52, repeatRate: 48, risk: "alert", stock: "low", salesWoW: 0.45, grossProfitWoW: 0.42, rating: 4.8, totalReviews: 479 },
+  // 産寧坂: 達成率43%。全14店最低。清水・河原町との三重カニバリで壊滅的
+  { id: "kyoto-sannenzaka",  name: "京都 産寧坂店",   sales:  600, avgOrder: 17500, fillRate: 58, repeatRate: 55, risk: "alert", stock: "low", salesWoW: 0.43, grossProfitWoW: 0.40, rating: 4.8, totalReviews: 2269 },
 ];
 
 const BASE_TOTAL_SALES = BASE_STORES.reduce((a, s) => a + s.sales, 0);

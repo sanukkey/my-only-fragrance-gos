@@ -325,11 +325,13 @@ export default function GoalManagementSection({
             <div
               key={m.storeId}
               className={`rounded-xl border p-4 transition-silent ${
-                m.status === "excellent"
-                  ? "bg-gradient-to-br from-[#FDF6E3] to-cream border-[#C9A962]/40"
-                  : m.status === "growth_opportunity"
-                  ? "bg-rose-50/60 border-rose-200/70"
-                  : "bg-offwhite border-champagneLight/50"
+                m.overallRate >= 100
+                  ? "bg-gradient-to-br from-[#FDF6E3] to-cream border-[#C9A962]/40"   // gold
+                  : m.overallRate >= 80
+                  ? "bg-amber-50/60 border-amber-200/60"                                // orange warning
+                  : m.overallRate >= 60
+                  ? "bg-rose-50/60 border-rose-200/70"                                  // red danger
+                  : "bg-rose-100/60 border-rose-300/70"                                 // deep red crisis
               }`}
             >
               {/* 店舗ヘッダー & ステータスバッジ */}
@@ -431,11 +433,10 @@ export default function GoalManagementSection({
                 <div className="h-1.5 bg-champagneLight/40 rounded-full overflow-hidden">
                   <div
                     className={`h-full rounded-full transition-all duration-500 ${
-                      m.status === "excellent"
-                        ? "bg-champagne"
-                        : m.status === "on_track"
-                        ? "bg-emerald-500"
-                        : "bg-rose-500"
+                      m.overallRate >= 100 ? "bg-champagne"
+                      : m.overallRate >= 80 ? "bg-amber-400"
+                      : m.overallRate >= 60 ? "bg-rose-500"
+                      : "bg-rose-700"
                     }`}
                     style={{ width: `${Math.min(100, m.overallRate)}%` }}
                   />

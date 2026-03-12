@@ -12,22 +12,25 @@ import {
 } from "./financeConstants";
 import type { TargetSet } from "../types/sales";
 
-/** BASE_STORES と同じ店舗・構成比でスケール */
+/**
+ * 月次売上目標（立地・商圏規模による傾斜配分）
+ * 400〜1,800万・200万刻み。合計 13,600万 → SCALE≈0.9926 で ≈13,500万に正規化。
+ */
 const BASE_STORE_PROPORTIONS: { storeId: string; baseSales: number }[] = [
-  { storeId: "kyoto-teramachi",    baseSales: 2000 },
-  { storeId: "kyoto-kiyomizu",     baseSales: 1500 },
-  { storeId: "nagoya-sakae",       baseSales: 1000 },
-  { storeId: "tokyo-harajuku",     baseSales:  950 },
-  { storeId: "kyoto-kawaramachi",  baseSales:  950 },
-  { storeId: "tokyo-soramachi",    baseSales:  900 },
-  { storeId: "kyoto-sannenzaka",   baseSales:  900 },
-  { storeId: "chiba-narita",       baseSales:  850 },
-  { storeId: "yokohama",           baseSales:  800 },
-  { storeId: "umeda",              baseSales:  800 },
-  { storeId: "hakata",             baseSales:  800 },
-  { storeId: "takayama",           baseSales:  750 },
-  { storeId: "kyoto-shinkyogoku",  baseSales:  700 },
-  { storeId: "kanazawa",           baseSales:  650 },
+  { storeId: "kyoto-teramachi",    baseSales: 1800 }, // 旗艦・京都中心部
+  { storeId: "tokyo-harajuku",     baseSales: 1800 }, // 東京プレミアム
+  { storeId: "kyoto-kiyomizu",     baseSales: 1400 }, // インバウンド観光地
+  { storeId: "nagoya-sakae",       baseSales: 1200 }, // 東海圏主要商圏
+  { storeId: "umeda",              baseSales: 1200 }, // 大阪・阪急沿線
+  { storeId: "tokyo-soramachi",    baseSales: 1000 }, // 東京東部・スカイツリー
+  { storeId: "yokohama",           baseSales: 1000 }, // 横浜・みなとみらい
+  { storeId: "kyoto-kawaramachi",  baseSales: 1000 }, // 京都繁華街
+  { storeId: "chiba-narita",       baseSales:  800 }, // 空港免税特需
+  { storeId: "hakata",             baseSales:  600 }, // 九州旗艦・成長途上
+  { storeId: "kyoto-sannenzaka",   baseSales:  600 }, // 京都観光路地
+  { storeId: "kyoto-shinkyogoku",  baseSales:  600 }, // 京都繁華街・小型
+  { storeId: "takayama",           baseSales:  400 }, // 地方観光・季節変動大
+  { storeId: "kanazawa",           baseSales:  400 }, // 地方・開業1年未満
 ];
 
 const BASE_TOTAL = BASE_STORE_PROPORTIONS.reduce((a, s) => a + s.baseSales, 0);

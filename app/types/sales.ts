@@ -43,19 +43,22 @@ export function calcAchievementRate(actual: number, target: number): Achievement
 
 /** 達成率に応じたカラークラス（Tailwind）
  *  ≥100% → シャンパンゴールド（達成）
- *  80-99% → エメラルドグリーン（通常）
- *  <80%  → ローズレッド（要注意）
+ *   80〜99% → アンバーオレンジ（警告）
+ *   60〜79% → ローズレッド（危機）
+ *   〜59%  → ディープローズ（深刻）
  */
 export function achievementBarClass(rate: number): string {
   if (rate >= 100) return "bg-champagne";
-  if (rate >= 80)  return "bg-emerald-500";
-  return "bg-rose-500";
+  if (rate >= 80)  return "bg-amber-400";
+  if (rate >= 60)  return "bg-rose-500";
+  return "bg-rose-700";
 }
 
 export function achievementTextClass(rate: number): string {
-  if (rate >= 100) return "text-[#B8942A]";  // champagne-dark
-  if (rate >= 80)  return "text-emerald-600";
-  return "text-rose-600";
+  if (rate >= 100) return "text-[#B8942A]";   // champagne-dark
+  if (rate >= 80)  return "text-amber-600";
+  if (rate >= 60)  return "text-rose-600";
+  return "text-rose-800";
 }
 
 /** 店舗別4KPI月次目標（客単価・予約充足率・リピート意向率） */

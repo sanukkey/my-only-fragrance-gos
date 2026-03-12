@@ -21,15 +21,17 @@ const STROKE_WIDTH = 7;
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS; // ≈ 175.9
 
 function ringStrokeColor(rate: number): string {
-  if (rate >= 100) return "#C9A962";  // champagne gold — 達成・超過
-  if (rate >= 80)  return "#10b981";  // emerald green — 通常ペース
-  return "#f43f5e";                   // rose red — 要注意
+  if (rate >= 100) return "#C9A962";  // champagne gold  — 達成（超過）
+  if (rate >= 80)  return "#f59e0b";  // amber-400       — 警告（80〜99%）
+  if (rate >= 60)  return "#f43f5e";  // rose-500        — 危機（60〜79%）
+  return "#be123c";                   // rose-700        — 深刻（〜59%）
 }
 
 function ringTextColor(rate: number): string {
   if (rate >= 100) return "#B8942A";  // champagne-dark gold
-  if (rate >= 80)  return "#059669";  // emerald-600 green
-  return "#e11d48";                   // rose-600 red
+  if (rate >= 80)  return "#d97706";  // amber-600
+  if (rate >= 60)  return "#e11d48";  // rose-600
+  return "#9f1239";                   // rose-800
 }
 
 export default function ProgressRing({
