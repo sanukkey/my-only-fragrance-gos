@@ -60,23 +60,33 @@ export default function GoalManagementSection({
     (a, t) => a + t.monthlySalesTarget,
     0
   );
-  const monthlyRate =
-    totalMonthlyTarget > 0 ? (displaySales / totalMonthlyTarget) * 100 : 0;
-  const annualSalesRate =
-    targets.annualTarget.annualSalesTarget > 0
-      ? ((displaySales * 12) / targets.annualTarget.annualSalesTarget) * 100
-      : 0;
-  const annualProfitRate =
-    targets.annualTarget.annualProfitTarget > 0
-      ? ((displayGrossProfit * 12) / targets.annualTarget.annualProfitTarget) * 100
-      : 0;
 
-  // 全社着地予想（店舗別着地予想の合計）
+  // 全社着地予想 = 14店舗の「salesWoW反映済み月末着地予想」の合算
   const corporateProjected = storeGoalMetrics.reduce(
     (a, m) => a + m.salesProjection.projected,
     0
   );
   const corporateShortfall = totalMonthlyTarget - corporateProjected;
+
+  // 達成率 = 着地予想 ÷ 月次目標（displaySalesは月次目標と同値のため使わない）
+  const monthlyRate =
+    totalMonthlyTarget > 0 ? (corporateProjected / totalMonthlyTarget) * 100 : 0;
+
+  // 年間ペース = 着地予想 × 12ヶ月
+  const corporateAnnualPace = corporateProjected * 12;
+  const annualSalesRate =
+    targets.annualTarget.annualSalesTarget > 0
+      ? (corporateAnnualPace / targets.annualTarget.annualSalesTarget) * 100
+      : 0;
+
+  // 年間利益ペース = 着地予想売上に粗利率を適用
+  const impliedMarginRate = displaySales > 0 ? displayGrossProfit / displaySales : 0;
+  const corporateProjectedProfit = Math.round(corporateProjected * impliedMarginRate);
+  const annualProfitRate =
+    targets.annualTarget.annualProfitTarget > 0
+      ? ((corporateProjectedProfit * 12) / targets.annualTarget.annualProfitTarget) * 100
+      : 0;
+
   const elapsedPct = Math.round((elapsedDays / totalDays) * 100);
 
   return (
@@ -219,8 +229,8 @@ export default function GoalManagementSection({
             <div className="mt-3">
               <div className="flex justify-between items-center font-sans text-xs mb-1.5">
                 <span className="text-warmMuted">
-                  年間ペース（月次×12）:{" "}
-                  {(displaySales * 12).toLocaleString("ja-JP")} 万円
+                  年間ペース（着地予想×12）:{" "}
+                  {corporateAnnualPace.toLocaleString("ja-JP")} 万円
                 </span>
                 <span
                   className={`font-semibold tabular-nums ${achievementTextClass(
@@ -263,8 +273,8 @@ export default function GoalManagementSection({
             <div className="mt-3">
               <div className="flex justify-between items-center font-sans text-xs mb-1.5">
                 <span className="text-warmMuted">
-                  粗利ペース（月次×12）:{" "}
-                  {(displayGrossProfit * 12).toLocaleString("ja-JP")} 万円
+                  粗利ペース（着地予想×12）:{" "}
+                  {(corporateProjectedProfit * 12).toLocaleString("ja-JP")} 万円
                 </span>
                 <span
                   className={`font-semibold tabular-nums ${achievementTextClass(
