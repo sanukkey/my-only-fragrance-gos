@@ -41,16 +41,20 @@ export function calcAchievementRate(actual: number, target: number): Achievement
   return { actual, target, achievementRate, isOnTrack: achievementRate >= 100 };
 }
 
-/** 達成率に応じたカラークラス（Tailwind） */
+/** 達成率に応じたカラークラス（Tailwind）
+ *  ≥100% → シャンパンゴールド（達成）
+ *  80-99% → エメラルドグリーン（通常）
+ *  <80%  → ローズレッド（要注意）
+ */
 export function achievementBarClass(rate: number): string {
-  if (rate >= 100) return "bg-emerald-500";
-  if (rate >= 80) return "bg-amber-400";
-  return "bg-rose-400";
+  if (rate >= 100) return "bg-champagne";
+  if (rate >= 80)  return "bg-emerald-500";
+  return "bg-rose-500";
 }
 
 export function achievementTextClass(rate: number): string {
-  if (rate >= 100) return "text-emerald-600";
-  if (rate >= 80) return "text-amber-600";
+  if (rate >= 100) return "text-[#B8942A]";  // champagne-dark
+  if (rate >= 80)  return "text-emerald-600";
   return "text-rose-600";
 }
 
@@ -87,9 +91,9 @@ export function getGoalStatusLabel(status: GoalStatus): string {
 /** ステータスのTailwindバッジクラス */
 export function getGoalStatusBadgeClass(status: GoalStatus): string {
   switch (status) {
-    case "excellent": return "bg-emerald-100 text-emerald-800 border border-emerald-300";
-    case "on_track": return "bg-sky-100 text-sky-800 border border-sky-300";
-    case "growth_opportunity": return "bg-amber-100 text-amber-800 border border-amber-300";
+    case "excellent":          return "bg-[#FDF6E3] text-[#B8942A] border border-[#C9A962]/60";  // gold
+    case "on_track":           return "bg-emerald-50 text-emerald-800 border border-emerald-300"; // green
+    case "growth_opportunity": return "bg-rose-50 text-rose-800 border border-rose-300";          // red
   }
 }
 

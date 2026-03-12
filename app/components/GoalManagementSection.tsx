@@ -79,9 +79,15 @@ export default function GoalManagementSection({
       ? (corporateAnnualPace / targets.annualTarget.annualSalesTarget) * 100
       : 0;
 
-  // 年間利益ペース = 着地予想売上に粗利率を適用
-  const impliedMarginRate = displaySales > 0 ? displayGrossProfit / displaySales : 0;
-  const corporateProjectedProfit = Math.round(corporateProjected * impliedMarginRate);
+  // 年間利益ペース:
+  // displayGrossProfit はグロス粗利（売上の77%）で、利益目標はネット純利益（約1,500万/月）。
+  // 直接比較すると 300%+ になるため、「利益はセールスペースに比例する」前提で
+  // 純利益目標÷月次売上目標 の比率（純利益率）で着地予想売上からスケール。
+  const netMarginRatio =
+    totalMonthlyTarget > 0
+      ? (targets.annualTarget.annualProfitTarget / 12) / totalMonthlyTarget
+      : 0;
+  const corporateProjectedProfit = Math.round(corporateProjected * netMarginRatio);
   const annualProfitRate =
     targets.annualTarget.annualProfitTarget > 0
       ? ((corporateProjectedProfit * 12) / targets.annualTarget.annualProfitTarget) * 100
@@ -273,7 +279,7 @@ export default function GoalManagementSection({
             <div className="mt-3">
               <div className="flex justify-between items-center font-sans text-xs mb-1.5">
                 <span className="text-warmMuted">
-                  粗利ペース（着地予想×12）:{" "}
+                  純利益ペース（着地予想×12）:{" "}
                   {(corporateProjectedProfit * 12).toLocaleString("ja-JP")} 万円
                 </span>
                 <span
@@ -320,9 +326,9 @@ export default function GoalManagementSection({
               key={m.storeId}
               className={`rounded-xl border p-4 transition-silent ${
                 m.status === "excellent"
-                  ? "bg-gradient-to-br from-emerald-50 to-cream border-emerald-200/80"
+                  ? "bg-gradient-to-br from-[#FDF6E3] to-cream border-[#C9A962]/40"
                   : m.status === "growth_opportunity"
-                  ? "bg-amber-50/40 border-amber-200/60"
+                  ? "bg-rose-50/60 border-rose-200/70"
                   : "bg-offwhite border-champagneLight/50"
               }`}
             >
@@ -426,10 +432,10 @@ export default function GoalManagementSection({
                   <div
                     className={`h-full rounded-full transition-all duration-500 ${
                       m.status === "excellent"
-                        ? "bg-emerald-500"
+                        ? "bg-champagne"
                         : m.status === "on_track"
-                        ? "bg-sky-400"
-                        : "bg-amber-400"
+                        ? "bg-emerald-500"
+                        : "bg-rose-500"
                     }`}
                     style={{ width: `${Math.min(100, m.overallRate)}%` }}
                   />
