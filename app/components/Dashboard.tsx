@@ -47,22 +47,45 @@ const BRAND_RED_ALERT_THRESHOLD = 4.8;
 const TOTAL_BRAND_TRUST_REVIEWS = 81425;
 const LEGENDARY_REVIEWS_MIN = 10000;
 
-/** 14店舗。旗艦は月商1,500〜2,000万、標準店は800〜1,200万。合計13,500。 */
+/**
+ * 14店舗のリアルな「ドラマ」データ（2026年3月12日 木曜14時時点）
+ *
+ * 絶好調（4店）: salesWoW 1.10〜1.18 — 春シーズン・ブランド力全開の旗艦
+ * あと一歩（5店）: salesWoW 0.90〜0.98 — 都市部競合で若干ペース遅れ
+ * 苦戦中（5店）: salesWoW 0.72〜0.80 — 季節変動・開業途中・観光客減
+ */
 const BASE_STORES = [
-  { id: "kyoto-teramachi", name: "京都 寺町店", sales: 2000, avgOrder: 20200, fillRate: 97, repeatRate: 88, risk: "none", stock: "ok", salesWoW: 1.0, grossProfitWoW: 1.0, rating: 5.0, totalReviews: 17726 },
-  { id: "kyoto-kiyomizu", name: "京都 清水店", sales: 1500, avgOrder: 19800, fillRate: 96, repeatRate: 86, risk: "none", stock: "ok", salesWoW: 1.0, grossProfitWoW: 1.0, rating: 5.0, totalReviews: 13722 },
-  { id: "nagoya-sakae", name: "名古屋 栄店", sales: 1000, avgOrder: 20500, fillRate: 97, repeatRate: 87, risk: "none", stock: "ok", salesWoW: 1.0, grossProfitWoW: 1.0, rating: 4.9, totalReviews: 20275 },
-  { id: "tokyo-harajuku", name: "東京 原宿店", sales: 950, avgOrder: 21200, fillRate: 95, repeatRate: 84, risk: "none", stock: "ok", salesWoW: 1.0, grossProfitWoW: 0.9, rating: 4.9, totalReviews: 10046 },
-  { id: "kyoto-kawaramachi", name: "京都 河原町店", sales: 950, avgOrder: 19200, fillRate: 94, repeatRate: 84, risk: "none", stock: "ok", salesWoW: 0.9, grossProfitWoW: 0.8, rating: 5.0, totalReviews: 4473 },
-  { id: "tokyo-soramachi", name: "東京 ソラマチ店", sales: 900, avgOrder: 19500, fillRate: 93, repeatRate: 80, risk: "none", stock: "ok", salesWoW: 0.9, grossProfitWoW: 0.8, rating: 4.9, totalReviews: 3802 },
-  { id: "kyoto-sannenzaka", name: "京都 産寧坂店", sales: 900, avgOrder: 18800, fillRate: 92, repeatRate: 80, risk: "none", stock: "ok", salesWoW: 0.8, grossProfitWoW: 0.7, rating: 5.0, totalReviews: 2269 },
-  { id: "chiba-narita", name: "千葉 成田空港店", sales: 850, avgOrder: 16500, fillRate: 88, repeatRate: 75, risk: "none", stock: "ok", salesWoW: 0.8, grossProfitWoW: 0.7, rating: 5.0, totalReviews: 2398 },
-  { id: "yokohama", name: "横浜店", sales: 800, avgOrder: 18800, fillRate: 91, repeatRate: 78, risk: "none", stock: "ok", salesWoW: 0.8, grossProfitWoW: 0.7, rating: 4.9, totalReviews: 2233 },
-  { id: "umeda", name: "梅田店", sales: 800, avgOrder: 19800, fillRate: 92, repeatRate: 77, risk: "none", stock: "ok", salesWoW: 0.8, grossProfitWoW: 0.7, rating: 5.0, totalReviews: 1512 },
-  { id: "hakata", name: "博多店", sales: 800, avgOrder: 18200, fillRate: 89, repeatRate: 74, risk: "none", stock: "ok", salesWoW: 0.7, grossProfitWoW: 0.6, rating: 4.9, totalReviews: 1075 },
-  { id: "takayama", name: "飛騨高山店", sales: 750, avgOrder: 17500, fillRate: 85, repeatRate: 72, risk: "none", stock: "ok", salesWoW: 0.7, grossProfitWoW: 0.6, rating: 5.0, totalReviews: 479 },
-  { id: "kyoto-shinkyogoku", name: "京都 新京極店", sales: 700, avgOrder: 17800, fillRate: 90, repeatRate: 76, risk: "none", stock: "ok", salesWoW: 0.7, grossProfitWoW: 0.6, rating: 5.0, totalReviews: 1180 },
-  { id: "kanazawa", name: "金沢店", sales: 650, avgOrder: 19200, fillRate: 86, repeatRate: 71, risk: "none", stock: "ok", salesWoW: 0.7, grossProfitWoW: 0.6, rating: 4.9, totalReviews: 235 },
+  // ── 絶好調 ─────────────────────────────────────────────────────────────────
+  // 京都寺町: 旗艦中の旗艦。リピーター層が厚く春シーズン全開
+  { id: "kyoto-teramachi", name: "京都 寺町店", sales: 2000, avgOrder: 20200, fillRate: 98, repeatRate: 91, risk: "none", stock: "ok", salesWoW: 1.18, grossProfitWoW: 1.20, rating: 5.0, totalReviews: 17726 },
+  // 清水: インバウンド再開で外国人観光客が急増。週末は満枠
+  { id: "kyoto-kiyomizu", name: "京都 清水店", sales: 1500, avgOrder: 18800, fillRate: 97, repeatRate: 87, risk: "none", stock: "ok", salesWoW: 1.12, grossProfitWoW: 1.14, rating: 5.0, totalReviews: 13722 },
+  // 名古屋栄: 地元VIP客の定期来訪サイクルが絶妙にはまった月
+  { id: "nagoya-sakae", name: "名古屋 栄店", sales: 1000, avgOrder: 21500, fillRate: 96, repeatRate: 88, risk: "none", stock: "ok", salesWoW: 1.15, grossProfitWoW: 1.16, rating: 4.9, totalReviews: 20275 },
+  // 博多: 九州初の旗艦が軌道に乗り始めた。口コミ獲得フェーズ
+  { id: "hakata", name: "博多店", sales: 800, avgOrder: 18200, fillRate: 95, repeatRate: 80, risk: "none", stock: "ok", salesWoW: 1.10, grossProfitWoW: 1.11, rating: 4.9, totalReviews: 1075 },
+  // ── あと一歩 ─────────────────────────────────────────────────────────────
+  // 原宿: 競合ブランドの新規出店で若干の客足分散。週末は戻す見込み
+  { id: "tokyo-harajuku", name: "東京 原宿店", sales: 950, avgOrder: 21200, fillRate: 93, repeatRate: 84, risk: "none", stock: "ok", salesWoW: 0.95, grossProfitWoW: 0.94, rating: 4.9, totalReviews: 10046 },
+  // 梅田: 先週の雨天続きで来客数が落ちた。週後半に巻き返せる
+  { id: "umeda", name: "梅田店", sales: 800, avgOrder: 19800, fillRate: 91, repeatRate: 79, risk: "none", stock: "ok", salesWoW: 0.98, grossProfitWoW: 0.97, rating: 5.0, totalReviews: 1512 },
+  // 河原町: 寺町と客層が重なりつつある。差別化施策を検討中
+  { id: "kyoto-kawaramachi", name: "京都 河原町店", sales: 950, avgOrder: 19200, fillRate: 90, repeatRate: 82, risk: "none", stock: "ok", salesWoW: 0.92, grossProfitWoW: 0.91, rating: 5.0, totalReviews: 4473 },
+  // 横浜: 安定した地盤はあるが単価が伸び悩む。体験の質アップが課題
+  { id: "yokohama", name: "横浜店", sales: 800, avgOrder: 18800, fillRate: 90, repeatRate: 77, risk: "none", stock: "ok", salesWoW: 0.93, grossProfitWoW: 0.92, rating: 4.9, totalReviews: 2233 },
+  // ソラマチ: 平日の観光客がやや少ない。週末カバーに期待
+  { id: "tokyo-soramachi", name: "東京 ソラマチ店", sales: 900, avgOrder: 19500, fillRate: 89, repeatRate: 80, risk: "none", stock: "ok", salesWoW: 0.90, grossProfitWoW: 0.89, rating: 4.9, totalReviews: 3802 },
+  // ── 苦戦中 ─────────────────────────────────────────────────────────────
+  // 産寧坂: 清水店との近接で来客が分散。エリア戦略の見直しが必要
+  { id: "kyoto-sannenzaka", name: "京都 産寧坂店", sales: 900, avgOrder: 18800, fillRate: 84, repeatRate: 74, risk: "watch", stock: "ok", salesWoW: 0.78, grossProfitWoW: 0.77, rating: 5.0, totalReviews: 2269 },
+  // 成田空港: 3月上旬の国際線搭乗客数が想定を下回る季節変動
+  { id: "chiba-narita", name: "千葉 成田空港店", sales: 850, avgOrder: 16500, fillRate: 77, repeatRate: 68, risk: "alert", stock: "ok", salesWoW: 0.72, grossProfitWoW: 0.70, rating: 5.0, totalReviews: 2398 },
+  // 新京極: 春休み前の端境期。来週から修学旅行シーズンで回復見込み
+  { id: "kyoto-shinkyogoku", name: "京都 新京極店", sales: 700, avgOrder: 17800, fillRate: 83, repeatRate: 73, risk: "none", stock: "ok", salesWoW: 0.80, grossProfitWoW: 0.79, rating: 5.0, totalReviews: 1180 },
+  // 飛騨高山: 冬シーズン終了後の谷間。在庫補充遅延も重なる
+  { id: "takayama", name: "飛騨高山店", sales: 750, avgOrder: 17500, fillRate: 79, repeatRate: 70, risk: "watch", stock: "low", salesWoW: 0.75, grossProfitWoW: 0.74, rating: 5.0, totalReviews: 479 },
+  // 金沢: 開業10ヶ月。まだ認知拡大フェーズ。口コミ数が少ない
+  { id: "kanazawa", name: "金沢店", sales: 650, avgOrder: 19200, fillRate: 80, repeatRate: 71, risk: "watch", stock: "ok", salesWoW: 0.74, grossProfitWoW: 0.73, rating: 4.9, totalReviews: 235 },
 ];
 
 const BASE_TOTAL_SALES = BASE_STORES.reduce((a, s) => a + s.sales, 0);
