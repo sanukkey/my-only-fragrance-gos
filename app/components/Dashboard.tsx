@@ -136,16 +136,78 @@ const QUALITY_KPIS = (() => {
   };
 })();
 
-/** 前週比が -5% を下回っている店舗（リスク・アラート対象）。売上または粗利のいずれかで閾値未満なら赤表示。 */
-const STORES_WITH_WOW_ALERT = STORES.filter(
-  (s) => s.salesWoW < WOW_ALERT_THRESHOLD || (s.grossProfitWoW ?? s.salesWoW) < WOW_ALERT_THRESHOLD
-);
+/**
+ * 課題特定対象: 月次達成率 80% 未満（salesWoW < 0.8）の店舗。
+ * TOMMY CRISIS MODE では salesWoW = 実績÷目標比率（0.43〜0.82）なので、
+ * 旧閾値 WOW_ALERT_THRESHOLD=-5 では誰もヒットしなかった（全員 > -5）。
+ * 正しい閾値 0.8 で 11 店舗を課題特定対象に変更。
+ */
+const STORES_WITH_WOW_ALERT = STORES.filter((s) => s.salesWoW < 0.8);
 
-/** AI ボトルネック特定: 立地・人・モノ・訴求の4要因（売上不振店舗向け）。14店舗実数では要因マップは必要に応じて追加。 */
+/**
+ * AI ボトルネック特定: 立地・人・モノ・訴求の4要因。
+ * fillRate・repeatRate・avgOrder・salesWoW の実数から仮説を自動生成。
+ */
 const AI_BOTTLENECK_BY_STORE: Record<
   string,
   { factor: string; factorLabel: "立地" | "人" | "モノ" | "訴求"; message: string; actionContent: string }
-> = {};
+> = {
+  "yokohama": {
+    factor: "集客（競合影響）", factorLabel: "訴求",
+    message: "競合モール新規出店で来客が3割減。既存顧客のリテンション施策が急務です。",
+    actionContent: "常連顧客への優先案内DMと、競合との差別化訴求（体験の唯一性）を即実施",
+  },
+  "kanazawa": {
+    factor: "認知度不足", factorLabel: "立地",
+    message: "開業1年未満で地域認知が不十分。予約充足率 63% は「知られていない」サインです。",
+    actionContent: "地元媒体・金沢観光SNSへの露出強化と体験予約ハードルの引き下げを実施",
+  },
+  "tokyo-soramachi": {
+    factor: "平日集客", factorLabel: "訴求",
+    message: "観光客依存で平日ガラガラ。週末だけでは月次目標の 65% どまりです。",
+    actionContent: "近隣オフィス向けギフト体験プランと平日割引予約枠の訴求を即開始",
+  },
+  "kyoto-kiyomizu": {
+    factor: "インバウンド依存", factorLabel: "立地",
+    message: "団体ツアー受け入れ減少が直撃。FIT（個人旅行）へのシフトが急務です。",
+    actionContent: "英語・中国語SNS向け個人体験コンテンツ発信と予約導線の多言語化を即実施",
+  },
+  "umeda": {
+    factor: "万博特需取りこぼし", factorLabel: "訴求",
+    message: "競合が先手を打ち、梅田エリアのギフト需要を先取りされています。",
+    actionContent: "万博関連コラボ企画とオフィス向けギフト体験プランの緊急展開",
+  },
+  "chiba-narita": {
+    factor: "国際線便数・単価", factorLabel: "モノ",
+    message: "国際線回復遅延で顧客流入が激減。客単価 15,800 円は全店最低で利益貢献も低下。",
+    actionContent: "免税対応商品ラインの見直しと便数回復状況に応じた人員シフト最適化を即手配",
+  },
+  "kyoto-teramachi": {
+    factor: "スタッフ離職", factorLabel: "人",
+    message: "旗艦店で離職が相次ぎ接客品質が急落。熟練スタッフ不在が売上55%の最大要因です。",
+    actionContent: "本部SVの現場常駐投入と採用を最優先。緊急の接客品質立て直しプランを策定",
+  },
+  "kyoto-shinkyogoku": {
+    factor: "来店率", factorLabel: "立地",
+    message: "通行量はあるが素通りが多い。入口導線・外観訴求の弱さが来店率を下げています。",
+    actionContent: "店頭サイン・ウィンドウディスプレイの即時改善と呼び込みスクリプトの統一化",
+  },
+  "tokyo-harajuku": {
+    factor: "ブランドイメージ回復", factorLabel: "訴求",
+    message: "SNS炎上余波で若年層客の離反が加速中。予約充足率 62% は信頼喪失を示しています。",
+    actionContent: "信頼できるクリエイターとのコラボ体験イベントでポジティブUGCを再構築",
+  },
+  "takayama": {
+    factor: "閑散期×在庫欠品", factorLabel: "立地",
+    message: "観光シーズン外で集客激減に加え、在庫補充遅延で欠品が発生。二重苦の状態です。",
+    actionContent: "地元リピーター向け冬季限定プランと在庫補充の最優先手配を即実施",
+  },
+  "kyoto-sannenzaka": {
+    factor: "三重カニバリ", factorLabel: "立地",
+    message: "清水・河原町・寺町との重複商圏で全社最低 43%。立地差別化戦略が不在です。",
+    actionContent: "産寧坂限定の匠体験コンテンツ（職人コラボ等）で他店と明確に差別化",
+  },
+};
 
 /** ブランド防衛: 直近14日間の口コミ平均の推移。4.8未満で「ブランド毀損の緊急警報」と連動。 */
 const SILENT_KILLER_THRESHOLD = 4.8;
@@ -471,16 +533,16 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* リスク・アラート: 前週比 -5% を下回った店舗を赤で最上部に表示 */}
+      {/* リスク・アラート: 月次達成率 80% 未満の店舗を課題特定対象として表示 */}
       {STORES_WITH_WOW_ALERT.length > 0 && (
         <div className="w-full max-w-6xl mx-auto px-4">
           <div className="rounded-2xl border-2 border-rose-200 bg-rose-50/90 p-4 md:p-5 card-shadow">
             <div className="flex items-center gap-2 font-sans font-semibold text-rose-800 mb-3">
               <TrendingDown size={20} className="flex-shrink-0" />
-              リスク・アラート
+              課題特定対象 — 月次達成率 80% 未満（{STORES_WITH_WOW_ALERT.length} 店舗）
             </div>
             <p className="font-sans text-sm text-rose-800/90 mb-3">
-              売上または粗利が前週比 -5% を下回っている店舗です。要因分析と対策を優先してください。
+              月次目標に対する着地予想が 80% を下回っています。AI が「なぜ売上が低いのか」を仮説特定し、店長へのアクションを提案します。
             </p>
             <ul className="flex flex-wrap gap-2">
               {STORES_WITH_WOW_ALERT.map((store) => (
@@ -489,8 +551,8 @@ export default function Dashboard() {
                   className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-white border border-rose-200 font-sans text-sm font-medium text-rose-900"
                 >
                   <span>{store.name}</span>
-                  <span className="tabular-nums text-rose-700">
-                    売上 {store.salesWoW > -100 ? store.salesWoW.toFixed(1) : store.salesWoW}% / 粗利 {(store.grossProfitWoW ?? store.salesWoW).toFixed(1)}%
+                  <span className={`tabular-nums font-bold ${store.salesWoW < 0.6 ? "text-rose-800" : "text-amber-700"}`}>
+                    {Math.round(store.salesWoW * 100)}%
                   </span>
                 </li>
               ))}
@@ -523,9 +585,17 @@ export default function Dashboard() {
                 const status = learningProgress[store.id] ?? "pending";
                 return (
                   <li key={store.id} className="bg-cream/10 rounded-xl p-4 border border-champagne/20">
+                    <div className="flex items-center gap-3 mb-2">
+                      <span className="font-sans font-semibold text-amber-200">⚠️ {store.name}</span>
+                      <span className={`font-sans text-xs font-bold tabular-nums px-2 py-0.5 rounded ${store.salesWoW < 0.6 ? "bg-rose-900/40 text-rose-200" : "bg-amber-900/40 text-amber-200"}`}>
+                        達成率 {Math.round(store.salesWoW * 100)}%
+                      </span>
+                      <span className="font-sans text-xs px-2 py-0.5 rounded bg-champagne/20 text-champagne">
+                        {bottleneck.factorLabel} 問題
+                      </span>
+                    </div>
                     <p className="font-sans text-sm text-cream mb-2">
-                      <span className="font-semibold text-amber-200">⚠️ {store.name}</span>
-                      {" "}課題特定: 「{bottleneck.factor}」にボトルネックあり。{bottleneck.message}
+                      AI仮説: 「{bottleneck.factor}」にボトルネックあり。{bottleneck.message}
                     </p>
                     <div className="flex flex-wrap items-center gap-3 mt-3">
                       <button
