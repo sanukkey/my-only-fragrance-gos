@@ -1755,34 +1755,45 @@ export default function Dashboard() {
                           contentStyle={{ fontFamily: "var(--font-dm-sans)", borderRadius: 12, border: "1px solid #E8DCC8" }}
                           formatter={(value: number, name: string) => [`${value.toLocaleString("ja-JP")} 万円`, name.replace(/\n.*/, "")]}
                         />
-                        <Legend formatter={(v) => v.replace(/\n.*/, "")} />
+                        {/* 凡例: 新配色に合わせてカスタム表示 */}
+                        <Legend
+                          formatter={(v) => {
+                            const label = v.replace(/\n.*/, "");
+                            return <span style={{ color: "#6B5B4F", fontFamily: "var(--font-dm-sans)", fontSize: 11 }}>{label}</span>;
+                          }}
+                        />
+                        {/* 目標線: 濃く太くして「超えるべき壁」を明示 */}
                         <ReferenceLine
                           y={totalTarget}
-                          stroke="#C9A962"
-                          strokeWidth={2}
-                          strokeDasharray="6 3"
-                          label={{ value: `目標 ${totalTarget.toLocaleString("ja-JP")}万`, position: "insideTopRight", fill: "#B8942A", fontSize: 11, fontFamily: "var(--font-dm-sans)" }}
+                          stroke="#1d4ed8"
+                          strokeWidth={3}
+                          strokeDasharray="8 4"
+                          label={{ value: `▶ 月次目標 ${totalTarget.toLocaleString("ja-JP")}万円`, position: "insideTopRight", fill: "#1d4ed8", fontSize: 12, fontWeight: 700, fontFamily: "var(--font-dm-sans)" }}
                         />
-                        <Bar dataKey="現状着地" stackId="s" fill="#f43f5e" radius={[0, 0, 0, 0]} />
-                        <Bar dataKey="施策A\n推しの残り香" stackId="s" fill="#fb923c" radius={[0, 0, 0, 0]} />
-                        <Bar dataKey="施策B\nUGC動画" stackId="s" fill="#38bdf8" radius={[0, 0, 0, 0]} />
-                        <Bar dataKey="施策C\nVIPパス" stackId="s" fill="#C9A962" radius={[4, 4, 0, 0]}>
+                        {/* 現状着地: グレー（無味乾燥な現状） */}
+                        <Bar dataKey="現状着地" stackId="s" fill="#d1d5db" radius={[0, 0, 0, 0]} />
+                        {/* 施策A: 黄色（第一歩・希望の芽生え） */}
+                        <Bar dataKey="施策A\n推しの残り香" stackId="s" fill="#facc15" radius={[0, 0, 0, 0]} />
+                        {/* 施策B: 青（信頼・加速） */}
+                        <Bar dataKey="施策B\nUGC動画" stackId="s" fill="#3b82f6" radius={[0, 0, 0, 0]} />
+                        {/* 施策C: 鮮やかな緑（目標達成） */}
+                        <Bar dataKey="施策C\nVIPパス" stackId="s" fill="#16a34a" radius={[4, 4, 0, 0]}>
                           <LabelList
                             dataKey="施策C\nVIPパス"
                             position="top"
                             formatter={(v: number, _: unknown, index: number) => {
-                              // 最後のバーのみ合計を表示
                               const totals = [baseProjected, afterA, afterAB, afterABC];
+                              if (index === 3 && v > 0) return "🎯 施策Cまでで目標達成！";
                               return totals[index] > 0 ? `${totals[index].toLocaleString("ja-JP")}万` : "";
                             }}
-                            style={{ fontSize: 10, fill: "#6B5B4F", fontFamily: "var(--font-dm-sans)" }}
+                            style={{ fontSize: 10, fill: "#15803d", fontWeight: 700, fontFamily: "var(--font-dm-sans)" }}
                           />
                         </Bar>
                       </ComposedChart>
                     </ResponsiveContainer>
                   </div>
                   <p className="font-sans text-[10px] text-warmMuted/80 mt-1">
-                    ゴールドの破線 = 月次売上目標。施策を3つ実行することで目標ラインとの差を埋める。
+                    青の太線 = 月次売上目標（超えるべき壁）。施策を3つ積み上げることで目標を突破する。
                   </p>
                 </div>
 
