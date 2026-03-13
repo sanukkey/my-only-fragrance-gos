@@ -338,6 +338,46 @@ const YEARLY_DATA = YEARLY_BASE.map((m) => ({
 
 const DEFAULT_MARGIN_RATE = GROSS_MARGIN_RATE;
 
+/**
+ * Critical Focus: AI が「客単価不足か、客数不足か」を1行で診断する純粋関数。
+ * avgOrder < 17,500 → 客単価問題
+ * fillRate < 68    → 客数問題
+ * 両方             → 二重苦
+ */
+function criticalDiagnosis(store: {
+  avgOrder: number;
+  fillRate: number;
+  repeatRate: number;
+  salesWoW: number;
+}): { label: "客単価" | "客数" | "両方" | "体験"; text: string } {
+  const avgOrderLow = store.avgOrder < 17_500;
+  const fillRateLow = store.fillRate < 68;
+  const rate = Math.round(store.salesWoW * 100);
+
+  if (avgOrderLow && fillRateLow) {
+    return {
+      label: "両方",
+      text: `客単価（¥${store.avgOrder.toLocaleString("ja-JP")}）と来客数（充足率 ${store.fillRate}%）が共に不足。二重苦で達成率 ${rate}% — 両面から即手を打て。`,
+    };
+  }
+  if (avgOrderLow) {
+    return {
+      label: "客単価",
+      text: `来客数（充足率 ${store.fillRate}%）は確保できているが、客単価（¥${store.avgOrder.toLocaleString("ja-JP")}）が全店平均を大幅に下回る。単価向上施策が最優先。`,
+    };
+  }
+  if (fillRateLow) {
+    return {
+      label: "客数",
+      text: `客単価（¥${store.avgOrder.toLocaleString("ja-JP")}）は問題ない。来客数（充足率 ${store.fillRate}%）の不足が達成率 ${rate}% の主因 — 集客施策を最優先。`,
+    };
+  }
+  return {
+    label: "体験",
+    text: `客単価・来客数は相対的に健全。リピート意向率 ${store.repeatRate}% が示す体験品質の低下、または訴求・予約導線の課題で機会損失が発生している。`,
+  };
+}
+
 type KpiSource = "POS System" | "Manual Input" | "Calculated" | "Reservation System" | "Survey";
 
 function SourceLabel({ source }: { source: KpiSource }) {
@@ -1417,11 +1457,63 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* 14店舗カード — Trust Score・殿堂入り・Perfect Performance */}
+      {/* 14店舗カード — Trust Score・殿堂入り */}
       <div className="w-full max-w-6xl mx-auto px-4">
         <div>
         <h2 className="font-sans text-lg font-semibold text-warmInk mb-1">店舗一覧</h2>
-        <p className="font-sans text-sm text-warmMuted mb-6">一人ひとりの接客が、お客様の「唯一無二」を作っています。数値はPOS連携データです。30分枠で接客25〜28分＋お見送り・準備2〜5分の完璧オペレーションで4.9を維持。</p>
+        <p className="font-sans text-sm text-warmMuted mb-6">一人ひとりの接客が、お客様の「唯一無二」を作っています。数値はPOS連携データです。</p>
+
+        {/* ── Critical Focus ─────────────────────────────────── */}
+        {STORES_WITH_WOW_ALERT.length > 0 && (
+          <div className="mb-8 rounded-2xl border-2 border-rose-300/50 overflow-hidden">
+            <div className="px-5 py-4 bg-rose-50/80 border-b border-rose-200/40 flex items-center justify-between gap-4 flex-wrap">
+              <div>
+                <h3 className="font-sans font-semibold text-rose-900 flex items-center gap-2">
+                  <AlertTriangle size={16} className="text-rose-600" />
+                  Critical Focus — {STORES_WITH_WOW_ALERT.length} 店舗が月次達成率 80% 未満
+                </h3>
+                <p className="font-sans text-xs text-rose-700/80 mt-0.5">
+                  AIが「客単価不足か、客数不足か」を1行で診断。今すぐアクションが必要な店舗一覧。
+                </p>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 p-4 md:p-5 bg-rose-50/30">
+              {STORES_WITH_WOW_ALERT.sort((a, b) => a.salesWoW - b.salesWoW).map((store) => {
+                const achievementRate = Math.round(store.salesWoW * 100);
+                const diag = criticalDiagnosis(store);
+                const labelColor = diag.label === "両方"
+                  ? "bg-rose-100 text-rose-800"
+                  : diag.label === "客単価"
+                  ? "bg-amber-100 text-amber-800"
+                  : diag.label === "客数"
+                  ? "bg-sky-100 text-sky-800"
+                  : "bg-purple-100 text-purple-800";
+                return (
+                  <div key={store.id} className="bg-white rounded-xl border border-rose-200/60 p-4">
+                    <div className="flex items-center justify-between gap-2 mb-2">
+                      <span className="font-sans font-semibold text-warmInk text-sm truncate">{store.name}</span>
+                      <span className={`font-sans text-xs font-bold tabular-nums px-2 py-0.5 rounded flex-shrink-0 ${achievementRate < 60 ? "bg-rose-100 text-rose-800" : "bg-amber-100 text-amber-700"}`}>
+                        {achievementRate}%
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className={`font-sans text-[10px] font-semibold px-1.5 py-0.5 rounded flex-shrink-0 ${labelColor}`}>
+                        {diag.label}問題
+                      </span>
+                      <p className="font-sans text-xs text-warmInk/90 leading-snug">{diag.text}</p>
+                    </div>
+                    <div className="flex gap-3 font-sans text-[10px] text-warmMuted border-t border-champagneLight/40 pt-2 mt-1">
+                      <span>客単価 ¥{store.avgOrder.toLocaleString("ja-JP")}</span>
+                      <span>充足率 {store.fillRate}%</span>
+                      <span>リピート {store.repeatRate}%</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-5">
           {STORES.map((store) => (
             <div
@@ -1433,9 +1525,6 @@ export default function Dashboard() {
               <div className="flex items-start justify-between gap-2">
                 <h3 className="font-sans font-semibold text-warmInk text-sm">{store.name}</h3>
                 <div className="flex gap-1 flex-shrink-0 flex-wrap justify-end">
-                  <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-xs font-medium bg-emerald-100 text-emerald-800" title="30分枠で接客25〜28分＋お見送り・準備。枠占有率90%以上で一切の妥協なく4.9を叩き出し">
-                    Perfect Performance
-                  </span>
                   {store.isLegendary && (
                     <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-xs font-medium bg-champagne/30 text-champagne border border-champagne/50" title="殿堂入り（Legendary Status）— 口コミ数万件規模">
                       ✦ 殿堂入り
@@ -1528,12 +1617,8 @@ export default function Dashboard() {
                   <span>Trust Score</span>
                   <span className="text-champagne font-semibold font-sans tabular-nums">{(store.trustScore ?? store.totalReviews * store.rating).toLocaleString("ja-JP")}</span>
                 </div>
-                <div className="flex justify-between">
-                  <span>枠占有率</span>
-                  <span className="text-warmInk font-medium font-sans tabular-nums">{slotOccupancyPct(AVG_SERVICE_TIME_BY_STORE[store.id] ?? 26)} %</span>
-                </div>
               </dl>
-              <p className="font-sans text-[10px] text-warmMuted/80 mt-2">Google Business Profile API 🔗 / 30分枠オペレーション（接客＋お見送り・準備）</p>
+              <p className="font-sans text-[10px] text-warmMuted/80 mt-2">Google Business Profile API 🔗</p>
             </div>
           ))}
         </div>
@@ -1549,7 +1634,7 @@ export default function Dashboard() {
         </div>
         <ul className="font-sans text-sm space-y-2 text-cream/90">
           <li>・14店舗の実数に基づく異常検知。評価4.8未満でRed Alert、Trust Score・殿堂入りで健全性を可視化。</li>
-          <li>・30分枠オペレーション: 接客25〜28分＋お見送り・準備2〜5分で枠占有率90〜97%。Optimal／Delay Risk／Quality Riskで効率を可視化。</li>
+          <li>・Critical Focus: 月次達成率80%未満の店舗を自動抽出し、「客単価不足 / 客数不足 / 両方 / 体験」の4分類でAIが根本原因を診断。</li>
         </ul>
         </div>
       </div>
