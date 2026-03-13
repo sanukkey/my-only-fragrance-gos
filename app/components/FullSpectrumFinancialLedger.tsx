@@ -165,10 +165,13 @@ export default function FullSpectrumFinancialLedger({
   grossMarginRate = GROSS_MARGIN_RATE,
   storeList,
   targets,
+  corporateProjected,
 }: {
   grossMarginRate?: number;
   storeList?: StoreInput[];
   targets?: TargetSet;
+  /** salesWoW加重の月末着地予想（万円）。GoalManagementSectionと同じ62.1%を表示するために使用。 */
+  corporateProjected?: number;
 }) {
   const storeRows = useMemo(
     () => (storeList && storeList.length > 0 ? buildStoreRows(storeList, grossMarginRate) : []),
@@ -284,9 +287,10 @@ export default function FullSpectrumFinancialLedger({
       {/* 0. 年間目標進捗バナー（targets が渡された場合のみ表示） */}
       {targets && (() => {
         const totalMonthlyTarget = targets.storeTargets.reduce((a, t) => a + t.monthlySalesTarget, 0);
-        const monthlyActual = storeRows.reduce((a, s) => a + s.sales, 0);
-        const monthlyRate = totalMonthlyTarget > 0 ? (monthlyActual / totalMonthlyTarget) * 100 : 0;
-        const annualPace = monthlyActual * 12;
+        // corporateProjected（salesWoW加重の月末着地予想）を優先。未渡しの場合は月次合計にフォールバック。
+        const projected = corporateProjected ?? storeRows.reduce((a, s) => a + s.sales, 0);
+        const monthlyRate = totalMonthlyTarget > 0 ? (projected / totalMonthlyTarget) * 100 : 0;
+        const annualPace = projected * 12;
         const annualRate = targets.annualTarget.annualSalesTarget > 0
           ? (annualPace / targets.annualTarget.annualSalesTarget) * 100
           : 0;
@@ -307,7 +311,7 @@ export default function FullSpectrumFinancialLedger({
                     {monthlyRate.toFixed(1)} %
                   </span>
                   <span className="font-sans text-sm text-warmMuted">
-                    実績 {monthlyActual.toLocaleString("ja-JP")} 万円 / 目標 {totalMonthlyTarget.toLocaleString("ja-JP")} 万円
+                    月末着地予想 {projected.toLocaleString("ja-JP")} 万円 / 目標 {totalMonthlyTarget.toLocaleString("ja-JP")} 万円
                   </span>
                 </div>
                 <div className="h-3 bg-champagneLight/40 rounded-full overflow-hidden">
@@ -337,7 +341,7 @@ export default function FullSpectrumFinancialLedger({
               </div>
             </div>
             <p className="font-sans text-[10px] text-warmMuted/80 px-4 pb-3">
-              年間ペース = 今月実績 × 12。Edit Mode で目標値を更新できます。
+              月末着地予想 = 累計実績 ÷ 経過日数 × 月日数（salesWoW加重）。年間ペース = 月末着地予想 × 12。
             </p>
           </div>
         );

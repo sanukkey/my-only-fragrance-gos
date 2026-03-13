@@ -1503,7 +1503,12 @@ export default function Dashboard() {
       </div>
 
       <div className="w-full max-w-6xl mx-auto px-4">
-        <FullSpectrumFinancialLedger grossMarginRate={displayMarginRate} storeList={STORES} targets={targets} />
+        <FullSpectrumFinancialLedger
+          grossMarginRate={displayMarginRate}
+          storeList={STORES}
+          targets={targets}
+          corporateProjected={STORES.reduce((a, s) => a + Math.round(s.sales * s.salesWoW), 0)}
+        />
       </div>
     </div>
   );
