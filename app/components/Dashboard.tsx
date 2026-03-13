@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo, useEffect, useCallback } from "react";
-import { AlertTriangle, Package, Users, Link2, PenLine, TrendingDown, Clock, BarChart3, Settings, CheckCircle2, Star, Heart, Smile, Zap, Send, BookOpen, MessageSquare, Shield, Sparkles, Mic, FileText, GraduationCap, Bell, Target, RefreshCw } from "lucide-react";
+import { AlertTriangle, Package, Users, Link2, PenLine, TrendingDown, TrendingUp, Clock, BarChart3, Settings, CheckCircle2, Star, Heart, Smile, Zap, Send, BookOpen, MessageSquare, Shield, Sparkles, Mic, FileText, GraduationCap, Bell, Target, RefreshCw } from "lucide-react";
 import GoalManagementSection from "./GoalManagementSection";
 import TodayOneStepSection from "./TodayOneStepSection";
 import StrategicManagementLedger from "./StrategicManagementLedger";
@@ -1656,6 +1656,162 @@ export default function Dashboard() {
           resetTargets={resetTargets}
         />
       </div>
+
+      {/* ========== Strategy Forecast — 逆転のシナリオ ========== */}
+      {(() => {
+        const baseProjected = STORES.reduce((a, s) => a + Math.round(s.sales * s.salesWoW), 0);
+        const STRATEGY_A = 1500;
+        const STRATEGY_B = 1000;
+        const STRATEGY_C = 2500;
+        const afterA = baseProjected + STRATEGY_A;
+        const afterAB = afterA + STRATEGY_B;
+        const afterABC = afterAB + STRATEGY_C;
+        const totalTarget = targets.storeTargets.reduce((a, t) => a + t.monthlySalesTarget, 0);
+        const finalRate = totalTarget > 0 ? (afterABC / totalTarget) * 100 : 0;
+
+        const chartData = [
+          {
+            name: "現状着地",
+            "現状着地": baseProjected,
+            "施策A\n推しの残り香": 0,
+            "施策B\nUGC動画": 0,
+            "施策C\nVIPパス": 0,
+          },
+          {
+            name: "施策A後",
+            "現状着地": baseProjected,
+            "施策A\n推しの残り香": STRATEGY_A,
+            "施策B\nUGC動画": 0,
+            "施策C\nVIPパス": 0,
+          },
+          {
+            name: "施策A+B後",
+            "現状着地": baseProjected,
+            "施策A\n推しの残り香": STRATEGY_A,
+            "施策B\nUGC動画": STRATEGY_B,
+            "施策C\nVIPパス": 0,
+          },
+          {
+            name: "逆転着地",
+            "現状着地": baseProjected,
+            "施策A\n推しの残り香": STRATEGY_A,
+            "施策B\nUGC動画": STRATEGY_B,
+            "施策C\nVIPパス": STRATEGY_C,
+          },
+        ];
+
+        return (
+          <div className="w-full max-w-6xl mx-auto px-4">
+            <div className="bg-cream rounded-2xl card-shadow border border-champagneLight/50 overflow-hidden">
+              {/* ヘッダー */}
+              <div className="p-6 md:p-8 border-b border-champagneLight/30 bg-champagneLight/10">
+                <h2 className="font-sans text-xl font-semibold text-warmInk flex items-center gap-2">
+                  <TrendingUp size={22} className="text-champagne" />
+                  Strategy Forecast — 逆転のシナリオ
+                </h2>
+                <p className="font-sans text-sm text-warmMuted mt-1">
+                  現状の月末着地予想 <strong className="text-rose-600">{baseProjected.toLocaleString("ja-JP")} 万円（{(totalTarget > 0 ? (baseProjected / totalTarget) * 100 : 0).toFixed(1)}%）</strong> に対し、
+                  3つの施策を積み上げると目標達成が見えてくる。
+                </p>
+              </div>
+
+              <div className="p-6 md:p-8 space-y-8">
+                {/* 施策3カード */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="rounded-xl bg-rose-50 border border-rose-200/60 p-4">
+                    <p className="font-sans text-[10px] font-semibold text-rose-600 uppercase tracking-wider mb-1">施策 A — 客数UP</p>
+                    <p className="font-sans text-2xl font-bold text-rose-700 tabular-nums">+{STRATEGY_A.toLocaleString("ja-JP")} 万円</p>
+                    <p className="font-sans text-sm font-semibold text-warmInk mt-1">推しの残り香イベント</p>
+                    <p className="font-sans text-xs text-warmMuted mt-1">新規顧客獲得イベントで全社客数を底上げ。SNS拡散を伴う集客施策。</p>
+                  </div>
+                  <div className="rounded-xl bg-sky-50 border border-sky-200/60 p-4">
+                    <p className="font-sans text-[10px] font-semibold text-sky-600 uppercase tracking-wider mb-1">施策 B — 成約率UP</p>
+                    <p className="font-sans text-2xl font-bold text-sky-700 tabular-nums">+{STRATEGY_B.toLocaleString("ja-JP")} 万円</p>
+                    <p className="font-sans text-sm font-semibold text-warmInk mt-1">ストーリー動画（UGC）</p>
+                    <p className="font-sans text-xs text-warmMuted mt-1">体験後の動画シェアで信頼構築。来店前の「欲しい」を高め成約率UP。</p>
+                  </div>
+                  <div className="rounded-xl bg-[#FDF6E3] border border-[#C9A962]/40 p-4">
+                    <p className="font-sans text-[10px] font-semibold text-[#B8942A] uppercase tracking-wider mb-1">施策 C — LTV UP</p>
+                    <p className="font-sans text-2xl font-bold text-[#B8942A] tabular-nums">+{STRATEGY_C.toLocaleString("ja-JP")} 万円</p>
+                    <p className="font-sans text-sm font-semibold text-warmInk mt-1">香りVIPパス（サブスク）</p>
+                    <p className="font-sans text-xs text-warmMuted mt-1">月次サブスクで安定リピートと高LTVを実現。解約率低減で複利効果。</p>
+                  </div>
+                </div>
+
+                {/* 積み上げチャート */}
+                <div>
+                  <p className="font-sans text-xs font-medium text-warmMuted uppercase tracking-wider mb-3">施策積み上げシミュレーション（万円）</p>
+                  <div className="h-72">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <ComposedChart data={chartData} margin={{ top: 24, right: 32, left: 0, bottom: 0 }}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#E8DCC8" />
+                        <XAxis dataKey="name" tick={{ fontSize: 11, fill: "#6B5B4F" }} />
+                        <YAxis
+                          tickFormatter={(v) => `${Math.round(v / 1000)}k`}
+                          domain={[0, Math.ceil((afterABC + 1000) / 1000) * 1000]}
+                          tick={{ fontSize: 11, fill: "#6B5B4F" }}
+                        />
+                        <Tooltip
+                          contentStyle={{ fontFamily: "var(--font-dm-sans)", borderRadius: 12, border: "1px solid #E8DCC8" }}
+                          formatter={(value: number, name: string) => [`${value.toLocaleString("ja-JP")} 万円`, name.replace(/\n.*/, "")]}
+                        />
+                        <Legend formatter={(v) => v.replace(/\n.*/, "")} />
+                        <ReferenceLine
+                          y={totalTarget}
+                          stroke="#C9A962"
+                          strokeWidth={2}
+                          strokeDasharray="6 3"
+                          label={{ value: `目標 ${totalTarget.toLocaleString("ja-JP")}万`, position: "insideTopRight", fill: "#B8942A", fontSize: 11, fontFamily: "var(--font-dm-sans)" }}
+                        />
+                        <Bar dataKey="現状着地" stackId="s" fill="#f43f5e" radius={[0, 0, 0, 0]} />
+                        <Bar dataKey="施策A\n推しの残り香" stackId="s" fill="#fb923c" radius={[0, 0, 0, 0]} />
+                        <Bar dataKey="施策B\nUGC動画" stackId="s" fill="#38bdf8" radius={[0, 0, 0, 0]} />
+                        <Bar dataKey="施策C\nVIPパス" stackId="s" fill="#C9A962" radius={[4, 4, 0, 0]}>
+                          <LabelList
+                            dataKey="施策C\nVIPパス"
+                            position="top"
+                            formatter={(v: number, _: unknown, index: number) => {
+                              // 最後のバーのみ合計を表示
+                              const totals = [baseProjected, afterA, afterAB, afterABC];
+                              return totals[index] > 0 ? `${totals[index].toLocaleString("ja-JP")}万` : "";
+                            }}
+                            style={{ fontSize: 10, fill: "#6B5B4F", fontFamily: "var(--font-dm-sans)" }}
+                          />
+                        </Bar>
+                      </ComposedChart>
+                    </ResponsiveContainer>
+                  </div>
+                  <p className="font-sans text-[10px] text-warmMuted/80 mt-1">
+                    ゴールドの破線 = 月次売上目標。施策を3つ実行することで目標ラインとの差を埋める。
+                  </p>
+                </div>
+
+                {/* 最終着地サマリー */}
+                <div className="rounded-xl bg-champagneLight/30 border-2 border-champagne/40 p-5 flex flex-wrap items-center justify-between gap-5">
+                  <div>
+                    <p className="font-sans text-xs text-warmMuted">現状月末着地予想</p>
+                    <p className="font-sans text-2xl font-bold text-rose-600 tabular-nums">{baseProjected.toLocaleString("ja-JP")} 万円</p>
+                    <p className="font-sans text-xs text-rose-500 mt-0.5">
+                      {(totalTarget > 0 ? (baseProjected / totalTarget) * 100 : 0).toFixed(1)}%
+                    </p>
+                  </div>
+                  <div className="font-sans text-3xl text-champagne">→</div>
+                  <div>
+                    <p className="font-sans text-xs text-warmMuted">施策 A + B + C 実行後</p>
+                    <p className="font-sans text-3xl font-bold text-[#B8942A] tabular-nums">{afterABC.toLocaleString("ja-JP")} 万円</p>
+                    <p className="font-sans text-xs text-[#B8942A] mt-0.5">+{(STRATEGY_A + STRATEGY_B + STRATEGY_C).toLocaleString("ja-JP")} 万円の逆転</p>
+                  </div>
+                  <div className="ml-auto text-right">
+                    <p className="font-sans text-xs text-warmMuted">最終着地予想達成率</p>
+                    <p className="font-sans text-4xl font-bold text-[#B8942A] tabular-nums">{finalRate.toFixed(1)} %</p>
+                    <p className="font-sans text-xs text-warmMuted mt-0.5">目標まで残り {Math.max(0, totalTarget - afterABC).toLocaleString("ja-JP")} 万円</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
 
       <div className="w-full max-w-6xl mx-auto px-4">
         <FullSpectrumFinancialLedger
