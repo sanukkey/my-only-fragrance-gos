@@ -100,6 +100,11 @@ const BASE_STORES = [
 const BASE_TOTAL_SALES = BASE_STORES.reduce((a, s) => a + s.sales, 0);
 const SALES_SCALE = BASE_TOTAL_SALES > 0 ? TARGET_TOTAL_SALES_MAN / BASE_TOTAL_SALES : 1;
 
+/** 2026-03-12: 月初から12日経過 / 3月31日 */
+const MTD_ELAPSED_DAYS = 12;
+const MTD_TOTAL_DAYS   = 31;
+const MTD_ELAPSED_RATIO = MTD_ELAPSED_DAYS / MTD_TOTAL_DAYS; // ≈ 0.387
+
 const STORES = BASE_STORES.map((s) => {
   const sales = Math.round(s.sales * SALES_SCALE);
   const qualityAlert = s.rating < BRAND_RED_ALERT_THRESHOLD;
@@ -350,26 +355,30 @@ export default function Dashboard() {
     () =>
       STORES.reduce(
         (a, s) => ({
-          sales: a.sales + s.sales,
+          /** 月初〜12日の累計実績（salesWoW × 経過比率）。"今月売上" KPIに使用 */
+          salesActual: a.salesActual + Math.round(s.sales * MTD_ELAPSED_RATIO * s.salesWoW),
+          /** 月次目標合計（SALES_SCALE 適用済み）。達成率計算の分母 */
+          salesTarget: a.salesTarget + s.sales,
           count: a.count + 1,
           fillSum: a.fillSum + s.fillRate,
           repeatSum: a.repeatSum + s.repeatRate,
           avgOrderSum: a.avgOrderSum + s.avgOrder,
         }),
-        { sales: 0, count: 0, fillSum: 0, repeatSum: 0, avgOrderSum: 0 }
+        { salesActual: 0, salesTarget: 0, count: 0, fillSum: 0, repeatSum: 0, avgOrderSum: 0 }
       ),
     []
   );
 
   const [kpi, setKpi] = useState({
-    sales: agg.sales,
+    sales: agg.salesActual,
     grossMarginRate: DEFAULT_MARGIN_RATE,
     avgOrder: Math.round(agg.avgOrderSum / agg.count),
     fillRate: Math.round((agg.fillSum / agg.count) * 10) / 10,
     repeatRate: Math.round((agg.repeatSum / agg.count) * 10) / 10,
   });
 
-  const displaySales = editMode ? kpi.sales : agg.sales;
+  /** 今月売上（表示用）= 月初〜今日の累計実績。目標値ではない */
+  const displaySales = editMode ? kpi.sales : agg.salesActual;
   const displayMarginRate = editMode ? kpi.grossMarginRate : DEFAULT_MARGIN_RATE;
   const displayGrossProfit = Math.round((displaySales * 10000 * (displayMarginRate / 100)) / 10000);
   const displayAvgOrder = editMode ? kpi.avgOrder : Math.round(agg.avgOrderSum / agg.count);
@@ -415,7 +424,7 @@ export default function Dashboard() {
               setEditMode((e) => !e);
               if (!editMode) {
                 setKpi({
-                  sales: agg.sales,
+                  sales: agg.salesActual,
                   grossMarginRate: DEFAULT_MARGIN_RATE,
                   avgOrder: Math.round(agg.avgOrderSum / agg.count),
                   fillRate: Math.round((agg.fillSum / agg.count) * 10) / 10,
@@ -1398,15 +1407,17 @@ export default function Dashboard() {
                   <span>売上</span>
                   <span className="text-warmInk font-medium font-sans">{store.sales.toLocaleString("ja-JP")} 万円</span>
                 </div>
-                {/* 月次目標達成率 */}
+                {/* 月次目標達成率（月初〜今日の累計実績 ÷ 月次目標） */}
                 {(() => {
                   const storeTarget = targets.storeTargets.find((t) => t.storeId === store.id);
                   const tgt = storeTarget?.monthlySalesTarget ?? store.sales;
-                  const rate = tgt > 0 ? (store.sales / tgt) * 100 : 0;
+                  // 累計実績 = 月次目標 × 経過日数比率 × 現在ペース（salesWoW）
+                  const salesActual = Math.round(store.sales * MTD_ELAPSED_RATIO * store.salesWoW);
+                  const rate = tgt > 0 ? (salesActual / tgt) * 100 : 0;
                   return (
                     <div>
                       <div className="flex justify-between mb-0.5">
-                        <span>月次目標達成率</span>
+                        <span>月初累計進捗率</span>
                         <span className={`font-semibold tabular-nums ${achievementTextClass(rate)}`}>
                           {rate.toFixed(1)} %
                         </span>
@@ -1417,7 +1428,7 @@ export default function Dashboard() {
                           style={{ width: `${Math.min(100, rate)}%` }}
                         />
                       </div>
-                      <p className="text-warmMuted/70 mt-0.5">目標 {tgt.toLocaleString("ja-JP")} 万円</p>
+                      <p className="text-warmMuted/70 mt-0.5">累計 {salesActual.toLocaleString("ja-JP")} 万円 / 目標 {tgt.toLocaleString("ja-JP")} 万円</p>
                     </div>
                   );
                 })()}
