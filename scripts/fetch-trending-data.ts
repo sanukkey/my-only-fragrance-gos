@@ -162,9 +162,12 @@ async function main() {
   const allItems: RakutenRawItem[] = [];
   let page = 1;
 
+  // API実行前にグローバルIPを表示（楽天IP許可リスト登録用）
+  const globalIP = await getGlobalIP();
   console.log('=========================================');
   console.log('  楽天 本番データ取得');
   console.log(`  キーワード: ${keyword}`);
+  console.log(`  実行環境グローバルIP: ${globalIP}`);
   console.log('=========================================');
 
   while (true) {
