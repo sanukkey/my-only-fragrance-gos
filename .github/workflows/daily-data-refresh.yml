@@ -1,0 +1,112 @@
+name: Daily Rakuten Data Refresh
+
+on:
+  # 毎日 JST 03:00 (UTC 18:00) に自動実行
+  schedule:
+    - cron: '0 18 * * *'
+  # 手動実行ボタン（GitHub Actions画面から即時実行可能）
+  workflow_dispatch:
+
+jobs:
+  refresh:
+    name: Fetch & Process Rakuten Data
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write   # data/フォルダへのコミット権限
+
+    steps:
+      # ── 1. リポジトリをチェックアウト ──────────────────────────
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # ── 2. Node.js セットアップ ──────────────────────────────
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      # ── 3. Python セットアップ ───────────────────────────────
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      # ── 4. 依存関係インストール ──────────────────────────────
+      - name: Install Node dependencies
+        run: npm ci
+
+      # ── 5. データディレクトリ作成 ─────────────────────────────
+      - name: Prepare data directories
+        run: mkdir -p data/portable-power/raw data/portable-power/processed
+
+      # ── 6. 楽天APIからデータ取得 ─────────────────────────────
+      - name: Fetch Rakuten data
+        env:
+          RAKUTEN_APP_ID:       ${{ secrets.RAKUTEN_APP_ID }}
+          RAKUTEN_ACCESS_KEY:   ${{ secrets.RAKUTEN_ACCESS_KEY }}
+          RAKUTEN_AFFILIATE_ID: ${{ secrets.RAKUTEN_AFFILIATE_ID }}
+          NEXT_PUBLIC_SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL }}
+        run: npx tsx scripts/fetch-trending-data.ts
+
+      # ── 7. AEO最適化JSONを生成 ──────────────────────────────
+      - name: Process AEO data
+        env:
+          NEXT_PUBLIC_SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL }}
+        run: python3 scripts/process-aeo-data.py
+
+      # ── 8. 古いファイルを削除（7日以上前のrawデータ） ──────────
+      - name: Cleanup old raw files
+        run: |
+          find data/portable-power/raw -name "*.json" -mtime +7 -delete 2>/dev/null || true
+          find data/portable-power/processed -name "*.json" -mtime +7 -delete 2>/dev/null || true
+          echo "Cleanup done"
+
+      # ── 9. 変更がある場合のみコミット＆プッシュ ──────────────
+      - name: Commit and push updated data
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/portable-power/
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+          else
+            TODAY=$(date +%Y-%m-%d)
+            ITEMS=$(python3 -c "
+          import json, glob, os
+          files = sorted(glob.glob('data/portable-power/processed/*-processed.json'), reverse=True)
+          if files:
+              d = json.load(open(files[0]))
+              print(d['meta']['totalItems'])
+          else:
+              print('0')
+          " 2>/dev/null || echo "0")
+            git commit -m "data: ${TODAY} 楽天ポータブル電源データ更新 (${ITEMS}件)"
+            git push origin main
+            echo "✅ Pushed: ${ITEMS} items"
+          fi
+
+      # ── 10. Vercel再デプロイをトリガー ───────────────────────
+      - name: Trigger Vercel redeploy
+        env:
+          VERCEL_TOKEN:      ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+          VERCEL_TEAM_ID:    ${{ secrets.VERCEL_TEAM_ID }}
+        run: |
+          curl -s -X POST \
+            "https://api.vercel.com/v13/deployments?teamId=${VERCEL_TEAM_ID}" \
+            -H "Authorization: Bearer ${VERCEL_TOKEN}" \
+            -H "Content-Type: application/json" \
+            -d "{
+              \"name\": \"my-only-fragrance-gos\",
+              \"gitSource\": {
+                \"type\": \"github\",
+                \"repoId\": \"$(curl -s https://api.github.com/repos/sanukkey/my-only-fragrance-gos | python3 -c 'import json,sys; print(json.load(sys.stdin)[\"id\"])')\",
+                \"ref\": \"main\"
+              },
+              \"projectId\": \"${VERCEL_PROJECT_ID}\",
+              \"target\": \"production\"
+            }" \
+          | python3 -c "import json,sys; d=json.load(sys.stdin); print('✅ Deploy triggered:', d.get('url','unknown'))" 2>/dev/null || echo "Deploy trigger skipped"
