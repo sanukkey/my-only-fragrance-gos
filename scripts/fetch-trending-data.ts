@@ -17,11 +17,6 @@ const AFFILIATE_ID = process.env.RAKUTEN_AFFILIATE_ID ?? '';
 if (!APP_ID)     { console.error('❌ RAKUTEN_APP_ID が未設定');     process.exit(1); }
 if (!ACCESS_KEY) { console.error('❌ RAKUTEN_ACCESS_KEY が未設定'); process.exit(1); }
 
-// -----------------------------------------
-const ip = await fetch('https://api.ipify.org').then(res => res.text());
-console.log("-----------------------------------------");
-console.log("【最重要】現在のIPアドレス:", ip);
-console.log("-----------------------------------------");
 
 // ---- 型定義 ----
 export interface RakutenRawItem {

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+  "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.portable-power.daily-update</string>
+
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/bash</string>
+    <string>/Users/sanukkey/my-only-fragrance-gos/scripts/run-daily-update.sh</string>
+  </array>
+
+  <!-- 毎日 JST 03:00 (UTC 18:00) に実行 -->
+  <key>StartCalendarInterval</key>
+  <dict>
+    <key>Hour</key>
+    <integer>18</integer>
+    <key>Minute</key>
+    <integer>0</integer>
+  </dict>
+
+  <key>StandardOutPath</key>
+  <string>/Users/sanukkey/my-only-fragrance-gos/logs/launchd-stdout.log</string>
+
+  <key>StandardErrorPath</key>
+  <string>/Users/sanukkey/my-only-fragrance-gos/logs/launchd-stderr.log</string>
+
+  <!-- Mac がスリープ中に時刻を過ぎた場合、起動後に実行 -->
+  <key>RunAtLoad</key>
+  <false/>
+
+</dict>
+</plist>

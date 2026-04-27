@@ -1,115 +1,54 @@
-name: Daily Rakuten Data Refresh
+name: Deploy on Data Push
+
+# ローカルMacがデータをpushしたときだけ動くワークフロー。
+# 楽天APIへのアクセスはIPが固定されているローカル環境が担当する。
+# このワークフローはVercelへのデプロイトリガーのみを行う。
 
 on:
-  # 毎日 JST 03:00 (UTC 18:00) に自動実行
-  schedule:
-    - cron: '0 18 * * *'
-  # 手動実行ボタン（GitHub Actions画面から即時実行可能）
+  push:
+    branches: [main]
+    paths:
+      - 'data/portable-power/**'   # データファイルが更新されたときのみ発火
+
+  # 手動実行（緊急デプロイ用）
   workflow_dispatch:
 
 env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true   # Node.js 24 に対応（deprecation警告を解消）
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
-  refresh:
-    name: Fetch & Process Rakuten Data
+  deploy:
+    name: Vercel Production Deploy
     runs-on: ubuntu-latest
-    permissions:
-      contents: write   # data/フォルダへのコミット権限
 
     steps:
-      # ── 1. リポジトリをチェックアウト ──────────────────────────
+      # ── 1. チェックアウト ────────────────────────────────────
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
-      # ── 2. Node.js セットアップ ──────────────────────────────
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-
-      # ── 3. Python セットアップ ───────────────────────────────
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-
-      # ── 4. 依存関係インストール ──────────────────────────────
-      - name: Install Node dependencies
-        run: npm ci
-
-      # ── 5. データディレクトリ作成 ─────────────────────────────
-      - name: Prepare data directories
-        run: mkdir -p data/portable-power/raw data/portable-power/processed
-
-      # ── 5.5. 実行環境のグローバルIPを事前表示 ─────────────────
-      # IP制限エラーが出た場合、このIPを楽天管理画面の許可リストに追加
-      - name: Show runner global IP (for Rakuten IP allowlist)
+      # ── 2. データファイルの確認 ──────────────────────────────
+      - name: Verify data files
         run: |
-          IP=$(curl -sf https://api.ipify.org || curl -sf https://checkip.amazonaws.com | tr -d '\n')
-          echo "╔══════════════════════════════════════════╗"
-          echo "║  Runner Global IP: ${IP}"
-          echo "║  楽天IP許可リストに登録が必要な場合はこのIPを使用"
-          echo "╚══════════════════════════════════════════╝"
-          echo "RUNNER_IP=${IP}" >> $GITHUB_ENV
-
-      # ── 6. 楽天APIからデータ取得 ─────────────────────────────
-      - name: Fetch Rakuten data
-        env:
-          RAKUTEN_APP_ID:       ${{ secrets.RAKUTEN_APP_ID }}
-          RAKUTEN_ACCESS_KEY:   ${{ secrets.RAKUTEN_ACCESS_KEY }}
-          RAKUTEN_AFFILIATE_ID: ${{ secrets.RAKUTEN_AFFILIATE_ID }}
-          NEXT_PUBLIC_SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL }}
-        run: npx tsx scripts/fetch-trending-data.ts
-
-      # ── 7. AEO最適化JSONを生成 ──────────────────────────────
-      - name: Process AEO data
-        env:
-          NEXT_PUBLIC_SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL }}
-        run: python3 scripts/process-aeo-data.py
-
-      # ── 8. 古いファイルを削除（7日以上前のrawデータ） ──────────
-      - name: Cleanup old raw files
-        run: |
-          find data/portable-power/raw -name "*.json" -mtime +7 -delete 2>/dev/null || true
-          find data/portable-power/processed -name "*.json" -mtime +7 -delete 2>/dev/null || true
-          echo "Cleanup done"
-
-      # ── 9. 変更がある場合のみコミット＆プッシュ ──────────────
-      - name: Commit and push updated data
-        run: |
-          git config user.name  "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add data/portable-power/
-          if git diff --cached --quiet; then
-            echo "No changes to commit."
-          else
-            TODAY=$(date +%Y-%m-%d)
-            ITEMS=$(python3 -c "
-          import json, glob, os
+          echo "=== 最新データファイル ==="
+          ls -lh data/portable-power/processed/ | tail -5
+          python3 -c "
+          import json, glob
           files = sorted(glob.glob('data/portable-power/processed/*-processed.json'), reverse=True)
           if files:
               d = json.load(open(files[0]))
-              print(d['meta']['totalItems'])
-          else:
-              print('0')
-          " 2>/dev/null || echo "0")
-            git commit -m "data: ${TODAY} 楽天ポータブル電源データ更新 (${ITEMS}件)"
-            git push origin main
-            echo "✅ Pushed: ${ITEMS} items"
-          fi
+              print(f'取得件数: {d[\"meta\"][\"totalItems\"]}件')
+              print(f'取得日時: {d[\"meta\"][\"processedAt\"]}')
+              print(f'モックデータ: {d[\"meta\"][\"isMockData\"]}')
+          "
 
-      # ── 10. Vercel再デプロイをトリガー ───────────────────────
-      - name: Trigger Vercel redeploy
+      # ── 3. Vercelへデプロイ ──────────────────────────────────
+      - name: Deploy to Vercel
         env:
           VERCEL_TOKEN:      ${{ secrets.VERCEL_TOKEN }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
           VERCEL_TEAM_ID:    ${{ secrets.VERCEL_TEAM_ID }}
         run: |
-          curl -s -X POST \
+          RESULT=$(curl -s -X POST \
             "https://api.vercel.com/v13/deployments?teamId=${VERCEL_TEAM_ID}" \
             -H "Authorization: Bearer ${VERCEL_TOKEN}" \
             -H "Content-Type: application/json" \
@@ -122,43 +61,24 @@ jobs:
               },
               \"projectId\": \"${VERCEL_PROJECT_ID}\",
               \"target\": \"production\"
-            }" \
-          | python3 -c "import json,sys; d=json.load(sys.stdin); print('✅ Deploy triggered:', d.get('url','unknown'))" 2>/dev/null || echo "Deploy trigger skipped"
-
-      # ── 11. 失敗時サマリー出力 ───────────────────────────────
-      - name: Failure summary
-        if: failure()
-        run: |
-          echo "## ❌ ワークフロー失敗サマリー" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "| 項目 | 値 |" >> $GITHUB_STEP_SUMMARY
-          echo "|------|-----|" >> $GITHUB_STEP_SUMMARY
-          echo "| 実行日時 | $(date '+%Y-%m-%d %H:%M:%S UTC') |" >> $GITHUB_STEP_SUMMARY
-          echo "| Runner IP | \`${RUNNER_IP:-不明}\` |" >> $GITHUB_STEP_SUMMARY
-          echo "| RAKUTEN_APP_ID | ${{ secrets.RAKUTEN_APP_ID != '' && '✅ セット済み' || '❌ 未設定' }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| RAKUTEN_ACCESS_KEY | ${{ secrets.RAKUTEN_ACCESS_KEY != '' && '✅ セット済み' || '❌ 未設定' }} |" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### IP制限エラーの場合" >> $GITHUB_STEP_SUMMARY
-          echo "上記 Runner IP を楽天ウェブサービス管理画面の許可リストに追加してください。" >> $GITHUB_STEP_SUMMARY
-          echo "→ https://webservice.rakuten.co.jp/app/list" >> $GITHUB_STEP_SUMMARY
-
-      # ── 12. 成功時サマリー出力 ──────────────────────────────
-      - name: Success summary
-        if: success()
-        run: |
-          ITEMS=$(python3 -c "
-          import json, glob
-          files = sorted(glob.glob('data/portable-power/processed/*-processed.json'), reverse=True)
-          if files:
-              d = json.load(open(files[0]))
-              print(d['meta']['totalItems'])
+            }")
+          echo "$RESULT" | python3 -c "
+          import json, sys
+          d = json.load(sys.stdin)
+          url = d.get('url', '')
+          state = d.get('readyState', d.get('status', ''))
+          if url:
+              print(f'✅ デプロイ開始: https://{url}')
           else:
-              print('0')
-          " 2>/dev/null || echo "0")
-          echo "## ✅ データ更新完了" >> $GITHUB_STEP_SUMMARY
+              print('⚠️  レスポンス:', json.dumps(d, ensure_ascii=False)[:200])
+          "
+
+      # ── 4. サマリー出力 ──────────────────────────────────────
+      - name: Summary
+        run: |
+          echo "## ✅ デプロイ完了" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "| 項目 | 値 |" >> $GITHUB_STEP_SUMMARY
           echo "|------|-----|" >> $GITHUB_STEP_SUMMARY
-          echo "| 取得件数 | ${ITEMS}件 |" >> $GITHUB_STEP_SUMMARY
-          echo "| 実行日時 | $(date '+%Y-%m-%d %H:%M:%S UTC') |" >> $GITHUB_STEP_SUMMARY
           echo "| 本番URL | https://my-only-fragrance-gos.vercel.app/portable-power |" >> $GITHUB_STEP_SUMMARY
+          echo "| 実行日時 | $(date '+%Y-%m-%d %H:%M:%S UTC') |" >> $GITHUB_STEP_SUMMARY
