@@ -49,6 +49,22 @@ export interface RawFetchResult {
 
 const wait = (ms: number) => new Promise(r => setTimeout(r, ms));
 
+/** 現在のグローバルIPを取得（IP制限エラー時のデバッグ用） */
+async function getGlobalIP(): Promise<string> {
+  try {
+    const res = await fetch('https://api.ipify.org?format=json', { signal: AbortSignal.timeout(5000) });
+    const data = await res.json() as { ip: string };
+    return data.ip;
+  } catch {
+    try {
+      const res2 = await fetch('https://checkip.amazonaws.com/', { signal: AbortSignal.timeout(5000) });
+      return (await res2.text()).trim();
+    } catch {
+      return '取得失敗';
+    }
+  }
+}
+
 async function fetchRakutenPage(
   keyword: string,
   page: number,
@@ -89,6 +105,19 @@ async function fetchRakutenPage(
 
   if (!res.ok) {
     const body = await res.text();
+    // IP制限エラー（403）の場合、現在のグローバルIPを表示
+    if (res.status === 403 || body.includes('CLIENT_IP_NOT_ALLOWED') || body.includes('IP_NOT_ALLOWED')) {
+      const ip = await getGlobalIP();
+      console.error(`\n  ╔══════════════════════════════════════════════════════╗`);
+      console.error(`  ║  ⛔ IP制限エラー (CLIENT_IP_NOT_ALLOWED)             ║`);
+      console.error(`  ╠══════════════════════════════════════════════════════╣`);
+      console.error(`  ║  現在のグローバルIP: ${ip.padEnd(32)}║`);
+      console.error(`  ╠══════════════════════════════════════════════════════╣`);
+      console.error(`  ║  対処: 楽天ウェブサービス管理画面で上記IPを許可リスト║`);
+      console.error(`  ║  に追加してください。                                ║`);
+      console.error(`  ║  → https://webservice.rakuten.co.jp/app/list        ║`);
+      console.error(`  ╚══════════════════════════════════════════════════════╝\n`);
+    }
     throw new Error(`楽天API エラー ${res.status}: ${body.slice(0, 300)}`);
   }
 
