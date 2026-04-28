@@ -5,7 +5,7 @@ import { RankingCard } from '@/app/components/drum-washing-machine/RankingCard';
 import { FaqSection } from '@/app/components/drum-washing-machine/FaqSection';
 
 const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL ?? 'https://my-only-fragrance-gos.vercel.app';
+  process.env.NEXT_PUBLIC_SITE_URL || 'https://my-only-fragrance-gos.vercel.app';
 
 export async function generateMetadata(): Promise<Metadata> {
   const data = getDrumWashingMachineData();

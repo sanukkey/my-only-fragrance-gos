@@ -5,7 +5,7 @@ import { RankingCard } from '@/app/components/portable-power/RankingCard';
 import { FaqSection } from '@/app/components/portable-power/FaqSection';
 
 const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL ?? 'https://my-only-fragrance-gos.vercel.app';
+  process.env.NEXT_PUBLIC_SITE_URL || 'https://my-only-fragrance-gos.vercel.app';
 
 // ---- generateMetadata（SSG時に動的メタデータ生成） ----
 export async function generateMetadata(): Promise<Metadata> {

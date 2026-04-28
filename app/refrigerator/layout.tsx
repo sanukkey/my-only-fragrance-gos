@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   metadataBase: new URL(
-    process.env.NEXT_PUBLIC_SITE_URL ?? 'https://my-only-fragrance-gos.vercel.app'
+    process.env.NEXT_PUBLIC_SITE_URL || 'https://my-only-fragrance-gos.vercel.app'
   ),
 };
 
