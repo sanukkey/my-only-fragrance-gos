@@ -1,6 +1,6 @@
-name: Deploy on Data Push
+name: Deploy on Push
 
-# ローカルMacがデータをpushしたときだけ動くワークフロー。
+# mainへのpush（コード変更・データ変更どちらも）でVercelにデプロイする。
 # 楽天APIへのアクセスはIPが固定されているローカル環境が担当する。
 # このワークフローはVercelへのデプロイトリガーのみを行う。
 
@@ -8,9 +8,13 @@ on:
   push:
     branches: [main]
     paths:
-      - 'data/portable-power/**'        # データファイルが更新されたときのみ発火
-      - 'data/drum-washing-machine/**'  # ドラム式洗濯機データ更新時も発火
-      - 'data/refrigerator/**'          # 大型冷蔵庫データ更新時も発火
+      - 'app/**'                        # フロントエンドのコード変更
+      - 'data/portable-power/**'        # ポータブル電源データ更新
+      - 'data/drum-washing-machine/**'  # ドラム式洗濯機データ更新
+      - 'data/refrigerator/**'          # 大型冷蔵庫データ更新
+      - 'public/**'                     # 静的アセット変更
+      - 'next.config.js'                # Next.js設定変更
+      - 'vercel.json'                   # Vercel設定変更
 
   # 手動実行（緊急デプロイ用）
   workflow_dispatch:
