@@ -1,7 +1,10 @@
 /**
  * fetch-trending-data.ts
- * 楽天商品検索APIからポータブル電源の売れ筋データを取得し、
- * data/portable-power/raw/ にJSON保存するスクリプト。
+ * 楽天商品検索APIから指定キーワードの売れ筋データを取得し JSON保存する汎用スクリプト。
+ *
+ * 使い方:
+ *   npx tsx scripts/fetch-trending-data.ts --keyword "ポータブル電源" --slug "portable-power"
+ *   npx tsx scripts/fetch-trending-data.ts --keyword "ドラム式洗濯機" --slug "drum-washing-machine"
  */
 
 import * as fs from 'fs';
@@ -10,13 +13,22 @@ import { config } from 'dotenv';
 
 config({ path: path.resolve(process.cwd(), '.env.local') });
 
-const APP_ID     = process.env.RAKUTEN_APP_ID;
-const ACCESS_KEY = process.env.RAKUTEN_ACCESS_KEY;
+// ---- CLI引数パース ----
+const args = process.argv.slice(2);
+const getArg = (flag: string, fallback: string) => {
+  const i = args.indexOf(flag);
+  return i !== -1 && args[i + 1] ? args[i + 1] : fallback;
+};
+const KEYWORD = getArg('--keyword', 'ポータブル電源');
+const SLUG    = getArg('--slug',    'portable-power');
+
+// ---- 環境変数 ----
+const APP_ID       = process.env.RAKUTEN_APP_ID;
+const ACCESS_KEY   = process.env.RAKUTEN_ACCESS_KEY;
 const AFFILIATE_ID = process.env.RAKUTEN_AFFILIATE_ID ?? '';
 
 if (!APP_ID)     { console.error('❌ RAKUTEN_APP_ID が未設定');     process.exit(1); }
 if (!ACCESS_KEY) { console.error('❌ RAKUTEN_ACCESS_KEY が未設定'); process.exit(1); }
-
 
 // ---- 型定義 ----
 export interface RakutenRawItem {
@@ -42,6 +54,7 @@ export interface RakutenRawItem {
 export interface RawFetchResult {
   fetchedAt: string;
   keyword: string;
+  slug: string;
   totalCount: number;
   pages: number;
   isMockData: false;
@@ -106,18 +119,13 @@ async function fetchRakutenPage(
 
   if (!res.ok) {
     const body = await res.text();
-    // IP制限エラー（403）の場合、現在のグローバルIPを表示
-    if (res.status === 403 || body.includes('CLIENT_IP_NOT_ALLOWED') || body.includes('IP_NOT_ALLOWED')) {
+    if (res.status === 403 || body.includes('CLIENT_IP_NOT_ALLOWED')) {
       const ip = await getGlobalIP();
-      console.error(`\n  ╔══════════════════════════════════════════════════════╗`);
-      console.error(`  ║  ⛔ IP制限エラー (CLIENT_IP_NOT_ALLOWED)             ║`);
-      console.error(`  ╠══════════════════════════════════════════════════════╣`);
-      console.error(`  ║  現在のグローバルIP: ${ip.padEnd(32)}║`);
-      console.error(`  ╠══════════════════════════════════════════════════════╣`);
-      console.error(`  ║  対処: 楽天ウェブサービス管理画面で上記IPを許可リスト║`);
-      console.error(`  ║  に追加してください。                                ║`);
-      console.error(`  ║  → https://webservice.rakuten.co.jp/app/list        ║`);
-      console.error(`  ╚══════════════════════════════════════════════════════╝\n`);
+      console.error(`\n  ╔══════════════════════════════════════════════╗`);
+      console.error(`  ║  ⛔ IP制限エラー (CLIENT_IP_NOT_ALLOWED)     ║`);
+      console.error(`  ║  現在のグローバルIP: ${ip.padEnd(26)}║`);
+      console.error(`  ║  → https://webservice.rakuten.co.jp/app/list ║`);
+      console.error(`  ╚══════════════════════════════════════════════╝\n`);
     }
     throw new Error(`楽天API エラー ${res.status}: ${body.slice(0, 300)}`);
   }
@@ -159,21 +167,17 @@ async function fetchRakutenPage(
 }
 
 async function main() {
-  const keyword  = 'ポータブル電源';
   const allItems: RakutenRawItem[] = [];
   let page = 1;
 
-  // API実行前にグローバルIPを表示（楽天IP許可リスト登録用）
-  const globalIP = await getGlobalIP();
   console.log('=========================================');
-  console.log('  楽天 本番データ取得');
-  console.log(`  キーワード: ${keyword}`);
-  console.log(`  実行環境グローバルIP: ${globalIP}`);
+  console.log(`  楽天データ取得: ${KEYWORD}`);
+  console.log(`  slug: ${SLUG}`);
   console.log('=========================================');
 
   while (true) {
     console.log(`\n  [page ${page}/3] 取得中...`);
-    const { items, hasMore } = await fetchRakutenPage(keyword, page);
+    const { items, hasMore } = await fetchRakutenPage(KEYWORD, page);
     if (items.length === 0) { console.log('  → 結果なし。終了。'); break; }
     allItems.push(...items);
     console.log(`  → ${items.length}件取得 (累計: ${allItems.length}件)`);
@@ -183,7 +187,7 @@ async function main() {
     await wait(1200);
   }
 
-  const seen  = new Set<string>();
+  const seen   = new Set<string>();
   const unique = allItems.filter(item => {
     if (seen.has(item.itemUrl)) return false;
     seen.add(item.itemUrl);
@@ -192,7 +196,8 @@ async function main() {
 
   const result: RawFetchResult = {
     fetchedAt:  new Date().toISOString(),
-    keyword,
+    keyword:    KEYWORD,
+    slug:       SLUG,
     totalCount: unique.length,
     pages:      page,
     isMockData: false,
@@ -200,21 +205,17 @@ async function main() {
   };
 
   const today      = new Date().toISOString().split('T')[0];
-  const outputPath = path.join(process.cwd(), 'data', 'portable-power', 'raw', `${today}_portable-power-raw.json`);
+  const outputPath = path.join(process.cwd(), 'data', SLUG, 'raw', `${today}_${SLUG}-raw.json`);
   fs.mkdirSync(path.dirname(outputPath), { recursive: true });
   fs.writeFileSync(outputPath, JSON.stringify(result, null, 2), 'utf-8');
 
-  // レビュー数最多商品
   const topReview = [...unique].sort((a, b) => b.reviewCount - a.reviewCount)[0];
 
   console.log('\n=========================================');
   console.log(`✅ 保存完了: ${outputPath}`);
   console.log(`   取得件数: ${unique.length}件`);
-  console.log(`   isMockData: false`);
-  console.log(`\n  ─ レビュー数最多 ─`);
-  console.log(`  タイトル: ${topReview.itemName}`);
-  console.log(`  価格: ¥${topReview.itemPrice.toLocaleString()}`);
-  console.log(`  レビュー数: ${topReview.reviewCount.toLocaleString()}件 ★${topReview.reviewAverage}`);
+  console.log(`   レビュー最多: ${topReview?.itemName?.slice(0, 40)}...`);
+  console.log(`   価格: ¥${topReview?.itemPrice?.toLocaleString()}`);
   console.log('=========================================');
 }
 

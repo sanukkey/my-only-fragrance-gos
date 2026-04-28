@@ -13,39 +13,59 @@ mkdir -p "$SCRIPT_DIR/logs"
 log() { echo "[$(date '+%Y-%m-%d %H:%M:%S')] $*" | tee -a "$LOG_FILE"; }
 
 log "========================================="
-log "  ポータブル電源データ 日次更新開始"
+log "  日次データ更新開始"
 log "========================================="
 
 cd "$SCRIPT_DIR"
 
-# 1. 楽天APIからデータ取得
-log "[1/4] 楽天APIからデータ取得中..."
-npx tsx scripts/fetch-trending-data.ts >> "$LOG_FILE" 2>&1
+# ──────────────────────────────────────────
+# ポータブル電源
+# ──────────────────────────────────────────
+log "[1/6] ポータブル電源: 楽天APIからデータ取得中..."
+npx tsx scripts/fetch-trending-data.ts --keyword "ポータブル電源" --slug "portable-power" >> "$LOG_FILE" 2>&1
 log "      取得完了"
 
-# 2. AEO最適化JSONを生成
-log "[2/4] AEO最適化JSON生成中..."
-python3 scripts/process-aeo-data.py >> "$LOG_FILE" 2>&1
+log "[2/6] ポータブル電源: AEO最適化JSON生成中..."
+python3 scripts/process-aeo-data.py --slug "portable-power" >> "$LOG_FILE" 2>&1
 log "      生成完了"
 
-# 3. git commit & push
-log "[3/4] GitHubにプッシュ中..."
-git add data/portable-power/
+# ──────────────────────────────────────────
+# ドラム式洗濯機
+# ──────────────────────────────────────────
+log "[3/6] ドラム式洗濯機: 楽天APIからデータ取得中..."
+npx tsx scripts/fetch-trending-data.ts --keyword "洗濯乾燥機" --slug "drum-washing-machine" >> "$LOG_FILE" 2>&1
+log "      取得完了"
+
+log "[4/6] ドラム式洗濯機: AEO最適化JSON生成中..."
+python3 scripts/process-aeo-data.py --slug "drum-washing-machine" >> "$LOG_FILE" 2>&1
+log "      生成完了"
+
+# ──────────────────────────────────────────
+# git commit & push
+# ──────────────────────────────────────────
+log "[5/6] GitHubにプッシュ中..."
+git add data/portable-power/ data/drum-washing-machine/
 if git diff --cached --quiet; then
   log "      変更なし。スキップ。"
 else
   TODAY=$(date +%Y-%m-%d)
-  ITEMS=$(python3 -c "
+  PP_ITEMS=$(python3 -c "
 import json, glob
 files = sorted(glob.glob('data/portable-power/processed/*-processed.json'), reverse=True)
 print(json.load(open(files[0]))['meta']['totalItems'] if files else 0)
 " 2>/dev/null || echo "0")
-  git commit -m "data: ${TODAY} 楽天ポータブル電源データ更新 (${ITEMS}件)"
+  DWM_ITEMS=$(python3 -c "
+import json, glob
+files = sorted(glob.glob('data/drum-washing-machine/processed/*-processed.json'), reverse=True)
+print(json.load(open(files[0]))['meta']['totalItems'] if files else 0)
+" 2>/dev/null || echo "0")
+  git commit -m "data: ${TODAY} 楽天データ更新 (電源${PP_ITEMS}件 / 洗濯機${DWM_ITEMS}件)"
   git push origin main
-  log "      プッシュ完了: ${ITEMS}件"
+  log "      プッシュ完了: 電源${PP_ITEMS}件 / 洗濯機${DWM_ITEMS}件"
 fi
 
-# 4. 完了
-log "[4/4] 完了 → Vercelが自動デプロイします"
-log "      URL: https://my-only-fragrance-gos.vercel.app/portable-power"
+# ──────────────────────────────────────────
+log "[6/6] 完了 → Vercelが自動デプロイします"
+log "      電源URL:  https://my-only-fragrance-gos.vercel.app/portable-power"
+log "      洗濯機URL: https://my-only-fragrance-gos.vercel.app/drum-washing-machine"
 log "========================================="

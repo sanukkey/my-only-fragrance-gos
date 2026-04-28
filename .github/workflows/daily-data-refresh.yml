@@ -8,7 +8,8 @@ on:
   push:
     branches: [main]
     paths:
-      - 'data/portable-power/**'   # データファイルが更新されたときのみ発火
+      - 'data/portable-power/**'        # データファイルが更新されたときのみ発火
+      - 'data/drum-washing-machine/**'  # ドラム式洗濯機データ更新時も発火
 
   # 手動実行（緊急デプロイ用）
   workflow_dispatch:
@@ -30,15 +31,15 @@ jobs:
       - name: Verify data files
         run: |
           echo "=== 最新データファイル ==="
-          ls -lh data/portable-power/processed/ | tail -5
+          ls -lh data/portable-power/processed/ | tail -3 || true
+          ls -lh data/drum-washing-machine/processed/ | tail -3 || true
           python3 -c "
           import json, glob
-          files = sorted(glob.glob('data/portable-power/processed/*-processed.json'), reverse=True)
-          if files:
-              d = json.load(open(files[0]))
-              print(f'取得件数: {d[\"meta\"][\"totalItems\"]}件')
-              print(f'取得日時: {d[\"meta\"][\"processedAt\"]}')
-              print(f'モックデータ: {d[\"meta\"][\"isMockData\"]}')
+          for slug in ['portable-power', 'drum-washing-machine']:
+              files = sorted(glob.glob(f'data/{slug}/processed/*-processed.json'), reverse=True)
+              if files:
+                  d = json.load(open(files[0]))
+                  print(f'[{slug}] 取得件数: {d[\"meta\"][\"totalItems\"]}件 / {d[\"meta\"][\"processedAt\"]}')
           "
 
       # ── 3. Vercelへデプロイ ──────────────────────────────────
@@ -80,5 +81,6 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "| 項目 | 値 |" >> $GITHUB_STEP_SUMMARY
           echo "|------|-----|" >> $GITHUB_STEP_SUMMARY
-          echo "| 本番URL | https://my-only-fragrance-gos.vercel.app/portable-power |" >> $GITHUB_STEP_SUMMARY
+          echo "| 電源URL | https://my-only-fragrance-gos.vercel.app/portable-power |" >> $GITHUB_STEP_SUMMARY
+          echo "| 洗濯機URL | https://my-only-fragrance-gos.vercel.app/drum-washing-machine |" >> $GITHUB_STEP_SUMMARY
           echo "| 実行日時 | $(date '+%Y-%m-%d %H:%M:%S UTC') |" >> $GITHUB_STEP_SUMMARY
