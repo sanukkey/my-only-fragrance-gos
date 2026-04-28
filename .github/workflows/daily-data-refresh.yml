@@ -47,37 +47,24 @@ jobs:
                   print(f'[{slug}] 取得件数: {d[\"meta\"][\"totalItems\"]}件 / {d[\"meta\"][\"processedAt\"]}')
           "
 
-      # ── 3. Vercelへデプロイ ──────────────────────────────────
+      # ── 3. Node.js セットアップ ──────────────────────────────
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # ── 4. Vercel CLI でデプロイ ──────────────────────────────
       - name: Deploy to Vercel
         env:
           VERCEL_TOKEN:      ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID:     ${{ secrets.VERCEL_TEAM_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-          VERCEL_TEAM_ID:    ${{ secrets.VERCEL_TEAM_ID }}
         run: |
-          RESULT=$(curl -s -X POST \
-            "https://api.vercel.com/v13/deployments?teamId=${VERCEL_TEAM_ID}" \
-            -H "Authorization: Bearer ${VERCEL_TOKEN}" \
-            -H "Content-Type: application/json" \
-            -d "{
-              \"name\": \"my-only-fragrance-gos\",
-              \"gitSource\": {
-                \"type\": \"github\",
-                \"repoId\": \"$(curl -s https://api.github.com/repos/sanukkey/my-only-fragrance-gos | python3 -c 'import json,sys; print(json.load(sys.stdin)[\"id\"])')\",
-                \"ref\": \"main\"
-              },
-              \"projectId\": \"${VERCEL_PROJECT_ID}\",
-              \"target\": \"production\"
-            }")
-          echo "$RESULT" | python3 -c "
-          import json, sys
-          d = json.load(sys.stdin)
-          url = d.get('url', '')
-          state = d.get('readyState', d.get('status', ''))
-          if url:
-              print(f'✅ デプロイ開始: https://{url}')
-          else:
-              print('⚠️  レスポンス:', json.dumps(d, ensure_ascii=False)[:200])
-          "
+          npm install -g vercel@latest --silent
+          vercel pull --yes --environment=production --token=$VERCEL_TOKEN
+          vercel build --prod --token=$VERCEL_TOKEN
+          vercel deploy --prebuilt --prod --token=$VERCEL_TOKEN | tee deploy_url.txt
+          echo "✅ デプロイ完了: $(cat deploy_url.txt | tail -1)"
 
       # ── 4. サマリー出力 ──────────────────────────────────────
       - name: Summary
