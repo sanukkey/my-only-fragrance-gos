@@ -10,6 +10,7 @@ on:
     paths:
       - 'data/portable-power/**'        # データファイルが更新されたときのみ発火
       - 'data/drum-washing-machine/**'  # ドラム式洗濯機データ更新時も発火
+      - 'data/refrigerator/**'          # 大型冷蔵庫データ更新時も発火
 
   # 手動実行（緊急デプロイ用）
   workflow_dispatch:
@@ -35,7 +36,7 @@ jobs:
           ls -lh data/drum-washing-machine/processed/ | tail -3 || true
           python3 -c "
           import json, glob
-          for slug in ['portable-power', 'drum-washing-machine']:
+          for slug in ['portable-power', 'drum-washing-machine', 'refrigerator']:
               files = sorted(glob.glob(f'data/{slug}/processed/*-processed.json'), reverse=True)
               if files:
                   d = json.load(open(files[0]))
@@ -83,4 +84,5 @@ jobs:
           echo "|------|-----|" >> $GITHUB_STEP_SUMMARY
           echo "| 電源URL | https://my-only-fragrance-gos.vercel.app/portable-power |" >> $GITHUB_STEP_SUMMARY
           echo "| 洗濯機URL | https://my-only-fragrance-gos.vercel.app/drum-washing-machine |" >> $GITHUB_STEP_SUMMARY
+          echo "| 冷蔵庫URL | https://my-only-fragrance-gos.vercel.app/refrigerator |" >> $GITHUB_STEP_SUMMARY
           echo "| 実行日時 | $(date '+%Y-%m-%d %H:%M:%S UTC') |" >> $GITHUB_STEP_SUMMARY

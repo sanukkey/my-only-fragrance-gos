@@ -290,9 +290,110 @@ DWM_CONFIG = {
 # ═══════════════════════════════════════════════════════════════════
 # ── メイン処理 ───────────────────────────────────────────────────
 # ═══════════════════════════════════════════════════════════════════
+# ═══════════════════════════════════════════════════════════════════
+# ── 大型冷蔵庫 設定 ─────────────────────────────────────────────
+# ═══════════════════════════════════════════════════════════════════
+def ref_price_factor(price):
+    if 100000 <= price <= 350000: return 1.0
+    if  50000 <= price < 100000:  return 0.85
+    if price < 50000:             return 0.5   # 小型・アクセサリー
+    return 0.85                                # 350k超プレミアム
+
+def ref_extract_specs(item):
+    text = item.get("itemName", "") + " " + item.get("itemCaption", "")
+    # 定格内容積: "365L" / "365リットル" / "定格内容積365L"
+    ml = re.search(r"(\d{3,4})\s*(?:L|リットル)(?!\s*[/・]?\s*\d)", text)
+    capacity_l = int(ml.group(1)) if ml else None
+    # 省エネ達成率: "省エネ達成率100%" / "省エネ基準達成率100%"
+    me = re.search(r"省エネ(?:基準)?達成率\s*(\d+)\s*%", text)
+    energy_saving_rate = int(me.group(1)) if me else None
+    # 年間消費電力量: "年間消費電力量XXXkWh"
+    mk = re.search(r"年間消費電力量\s*(\d+)\s*kWh", text, re.IGNORECASE)
+    annual_kwh = int(mk.group(1)) if mk else None
+    return {
+        "capacity_l":          capacity_l,
+        "energy_saving_rate":  energy_saving_rate,
+        "annual_kwh":          annual_kwh,
+    }
+
+def ref_classify(item):
+    l = item.get("capacity_l")
+    if l is None: return "不明"
+    if l < 300:   return "小容量（~300L）2人以下向け"
+    if l < 450:   return "中容量（300~450L）3~4人家族向け"
+    return "大容量（450L~）5人以上向け"
+
+def ref_use_cases(item):
+    tags  = []
+    l     = item.get("capacity_l")    or 0
+    price = item.get("itemPrice")     or 0
+    name  = item.get("itemName", "") + item.get("itemCaption", "")
+    if l >= 450: tags.append("大家族・5人以上向け")
+    elif l >= 300: tags.append("3~4人家族向け")
+    elif l > 0:  tags.append("1~2人向け")
+    if price <= 100000: tags.append("コスパ重視")
+    if price >= 250000: tags.append("ハイエンド")
+    if "フレンチドア" in name or "観音開き" in name: tags.append("フレンチドア")
+    if "省エネ" in name:   tags.append("省エネ性能重視")
+    if "自動製氷" in name: tags.append("自動製氷機能付き")
+    if "冷凍" in name:     tags.append("大容量冷凍室")
+    return tags if tags else ["汎用"]
+
+def ref_faq(top_items):
+    top      = top_items[0] if top_items else {}
+    top_name = (top.get("itemName") or "大型冷蔵庫")[:30]
+    return [
+        {
+            "question": "大型冷蔵庫のおすすめランキング1位はどれですか？",
+            "answer":   f"レビュー数と評価を総合したランキング1位は「{top_name}」です。{top.get('reviewCount',0):,}件のレビューで平均{top.get('reviewAverage',0)}点の高評価を獲得しています。",
+        },
+        {
+            "question": "冷蔵庫の容量はどれくらいが必要ですか？",
+            "answer":   "一般的な目安は「70L×家族人数+常備品分170L」です。2人家族なら310L前後、4人家族なら450L前後、5人以上なら500L以上が快適に使える容量です。",
+        },
+        {
+            "question": "冷蔵庫の省エネ性能はどう比較すればいいですか？",
+            "answer":   "「年間消費電力量（kWh/年）」と「省エネ達成率（%）」を確認してください。年間消費電力量が少ないほど電気代が安く、省エネ達成率100%以上が省エネ優良機種の目安です。",
+        },
+        {
+            "question": "冷蔵庫の人気メーカーはどこですか？",
+            "answer":   "パナソニック・日立・三菱電機・シャープ・東芝の5社が人気です。パナソニックはNR-Fシリーズ、日立はR-HWSシリーズ、三菱はMR-WXシリーズが代表的な大型モデルです。",
+        },
+        {
+            "question": "冷蔵庫の設置スペースの目安は？",
+            "answer":   "設置には放熱スペースとして左右各5mm以上・上部10cm以上が必要です。ドアの開閉スペースも確保してください。フレンチドア（観音開き）は開口部が狭い場所でも設置しやすいです。",
+        },
+        {
+            "question": "冷蔵庫の寿命はどのくらいですか？",
+            "answer":   "一般的な冷蔵庫の寿命は10~15年程度です。コンプレッサーの交換部品確保期限は製造終了から約9年のメーカーが多く、10年を超えたら買い替えを検討するのが一般的です。",
+        },
+        {
+            "question": "冷蔵庫の搬入・設置で注意することは？",
+            "answer":   "搬入経路（玄関・廊下・エレベーター）の寸法確認が重要です。冷蔵庫は横倒しにできないため、搬入経路の高さと幅が本体サイズ+10cm以上あることを事前に確認してください。",
+        },
+    ]
+
+REF_CONFIG = {
+    "name_jp":      "大型冷蔵庫",
+    "spec_keys":    ["capacity_l", "energy_saving_rate", "annual_kwh"],
+    "price_factor": ref_price_factor,
+    "extract_specs": ref_extract_specs,
+    "classify":     ref_classify,
+    "use_cases":    ref_use_cases,
+    "faq":          ref_faq,
+    "page_meta": {
+        "title":           "大型冷蔵庫おすすめ比較ランキング【2026年最新版】",
+        "description":     "2026年最新の大型冷蔵庫を徹底比較。容量・省エネ性能・価格・レビューから選ぶべき1台がわかります。パナソニック・日立・三菱・シャープなど人気メーカーを網羅。",
+        "h1":              "大型冷蔵庫おすすめ比較ランキング2026年版",
+        "breadcrumb_name": "大型冷蔵庫 比較ランキング",
+    },
+}
+
+
 CONFIGS = {
     "portable-power":       PP_CONFIG,
     "drum-washing-machine": DWM_CONFIG,
+    "refrigerator":         REF_CONFIG,
 }
 
 if SLUG not in CONFIGS:
