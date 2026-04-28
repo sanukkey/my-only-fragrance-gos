@@ -6,27 +6,27 @@ export const metadata: Metadata = {
   ),
 };
 
-export default function DrumWashingMachineLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function InfoLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-gray-50 text-gray-900 font-sans">
-      {/* ヘッダー */}
       <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
         <div className="max-w-3xl mx-auto px-4 h-14 flex items-center justify-between">
-          <a href="/drum-washing-machine" className="text-sm font-bold text-gray-800">
-            ドラム式洗濯機比較
+          <a href="/" className="text-sm font-bold text-gray-800">
+            家電比較ランキング
           </a>
-          <span className="text-xs text-gray-400">楽天市場 最新ランキング</span>
+          <nav className="flex gap-4 text-xs text-gray-500">
+            <a href="/portable-power"      className="hover:text-gray-800">ポータブル電源</a>
+            <a href="/drum-washing-machine" className="hover:text-gray-800">洗濯機</a>
+            <a href="/refrigerator"        className="hover:text-gray-800">冷蔵庫</a>
+          </nav>
         </div>
       </header>
 
-      {children}
+      <main className="max-w-3xl mx-auto px-4 py-10 pb-16">
+        {children}
+      </main>
 
-      {/* フッター */}
-      <footer className="mt-16 border-t border-gray-200 bg-white">
+      <footer className="border-t border-gray-200 bg-white">
         <div className="max-w-3xl mx-auto px-4 py-8 text-xs text-gray-400 space-y-3">
           <nav className="flex flex-wrap gap-4">
             <a href="/portable-power"       className="hover:text-gray-600">ポータブル電源</a>
@@ -38,8 +38,7 @@ export default function DrumWashingMachineLayout({
             <a href="/legal"   className="hover:text-gray-600">特商法に基づく表記</a>
           </nav>
           <p>※ 本サイトはアフィリエイト広告（楽天アフィリエイト）を利用しています。</p>
-          <p>※ 商品の価格・レビュー数は取得時点のものです。最新情報は各商品ページでご確認ください。</p>
-          <p>© 2026 ドラム式洗濯機比較ランキング</p>
+          <p>© 2026 家電比較ランキング</p>
         </div>
       </footer>
     </div>

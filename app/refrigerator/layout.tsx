@@ -25,7 +25,16 @@ export default function RefrigeratorLayout({
       {children}
 
       <footer className="mt-16 border-t border-gray-200 bg-white">
-        <div className="max-w-3xl mx-auto px-4 py-8 text-xs text-gray-400 space-y-2">
+        <div className="max-w-3xl mx-auto px-4 py-8 text-xs text-gray-400 space-y-3">
+          <nav className="flex flex-wrap gap-4">
+            <a href="/portable-power"       className="hover:text-gray-600">ポータブル電源</a>
+            <a href="/drum-washing-machine"  className="hover:text-gray-600">ドラム式洗濯機</a>
+            <a href="/refrigerator"         className="hover:text-gray-600">大型冷蔵庫</a>
+            <span className="text-gray-200">|</span>
+            <a href="/about"   className="hover:text-gray-600">運営者情報</a>
+            <a href="/privacy" className="hover:text-gray-600">プライバシーポリシー</a>
+            <a href="/legal"   className="hover:text-gray-600">特商法に基づく表記</a>
+          </nav>
           <p>※ 本サイトはアフィリエイト広告（楽天アフィリエイト）を利用しています。</p>
           <p>※ 商品の価格・レビュー数は取得時点のものです。最新情報は各商品ページでご確認ください。</p>
           <p>© 2026 大型冷蔵庫比較ランキング</p>
