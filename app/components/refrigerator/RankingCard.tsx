@@ -34,18 +34,23 @@ export function RankingCard({ item }: Props) {
         </span>
       </div>
 
-      {/* 商品画像 */}
+      {/* 商品画像（クリックでアフィリエイトリンクへ） */}
       {item.imageUrl && (
-        <div className="relative w-20 h-20 flex-shrink-0 rounded-xl overflow-hidden bg-gray-50">
+        <a
+          href={item.itemUrl}
+          target="_blank"
+          rel="nofollow noopener noreferrer sponsored"
+          className="relative w-20 h-20 flex-shrink-0 rounded-xl overflow-hidden bg-gray-50 block"
+        >
           <Image
             src={item.imageUrl}
             alt={cleanName}
             fill
             sizes="80px"
-            className="object-contain p-1"
+            className="object-contain p-1 hover:scale-105 transition-transform"
             unoptimized
           />
-        </div>
+        </a>
       )}
 
       {/* 商品情報 */}

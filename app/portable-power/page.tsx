@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
-import { getProcessedData } from '@/app/lib/getPortablePowerData';
+import Image from 'next/image';
+import { getProcessedData, cleanItemName } from '@/app/lib/getPortablePowerData';
 import { RankingCard } from '@/app/components/portable-power/RankingCard';
 import { FaqSection } from '@/app/components/portable-power/FaqSection';
 
@@ -149,20 +150,64 @@ export default function PortablePowerPage() {
         </section>
 
         {/* ===== 1位ピックアップ（AIスニペット狙い） ===== */}
-        <section className="bg-yellow-50 border border-yellow-200 rounded-2xl p-5 mb-8">
-          <p className="text-xs font-bold text-yellow-700 uppercase tracking-wide mb-1">
-            編集部 最推薦
-          </p>
-          <h2 className="text-base font-bold text-gray-800">
-            2026年 ポータブル電源 おすすめ第1位
-          </h2>
-          <p className="mt-1 text-sm text-gray-600 line-clamp-2">
-            {summary.topPick}
-          </p>
-          <p className="mt-2 text-xs text-gray-500">
-            レビュー数・評価・価格帯を総合したAEOスコアで算出
-          </p>
-        </section>
+        {ranking.length > 0 && (
+          <section className="bg-yellow-50 border border-yellow-200 rounded-2xl p-5 mb-8">
+            <p className="text-xs font-bold text-yellow-700 uppercase tracking-wide mb-3">
+              編集部 最推薦 — 2026年 第1位
+            </p>
+
+            {/* 画像 + 商品情報 */}
+            <div className="flex gap-4 items-start">
+              {ranking[0].imageUrl && (
+                <a
+                  href={ranking[0].itemUrl}
+                  target="_blank"
+                  rel="nofollow noopener noreferrer sponsored"
+                  className="relative w-24 h-24 flex-shrink-0 rounded-xl overflow-hidden bg-white border border-yellow-200 block"
+                >
+                  <Image
+                    src={ranking[0].imageUrl}
+                    alt={cleanItemName(ranking[0].itemName)}
+                    fill
+                    sizes="96px"
+                    className="object-contain p-1"
+                    unoptimized
+                  />
+                </a>
+              )}
+              <div className="flex-1 min-w-0">
+                <h2 className="text-sm font-bold text-gray-800 leading-snug line-clamp-3">
+                  {cleanItemName(ranking[0].itemName)}
+                </h2>
+                <div className="flex items-center gap-1 mt-1.5">
+                  <span className="text-yellow-400 text-xs" aria-hidden="true">★</span>
+                  <span className="text-xs text-gray-600">
+                    {ranking[0].reviewAverage}（{ranking[0].reviewCount.toLocaleString()}件）
+                  </span>
+                </div>
+                <p className="text-lg font-bold text-red-600 mt-1">
+                  ¥{ranking[0].itemPrice.toLocaleString()}
+                  <span className="text-xs font-normal text-gray-400 ml-1">（税込）</span>
+                </p>
+              </div>
+            </div>
+
+            {/* スコア説明 + CTAボタン */}
+            <div className="flex items-center justify-between mt-4 gap-3">
+              <p className="text-xs text-gray-500 leading-relaxed">
+                レビュー数・評価・価格帯を総合したAEOスコアで算出
+              </p>
+              <a
+                href={ranking[0].itemUrl}
+                target="_blank"
+                rel="nofollow noopener noreferrer sponsored"
+                className="flex-shrink-0 text-xs font-bold bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition-colors whitespace-nowrap"
+              >
+                楽天で詳細を見る →
+              </a>
+            </div>
+          </section>
+        )}
 
         {/* ===== ランキング ===== */}
         <section aria-label="ポータブル電源 ランキング TOP10" className="mb-12">
