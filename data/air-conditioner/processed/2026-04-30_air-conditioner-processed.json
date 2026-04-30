@@ -1,0 +1,164 @@
+{
+  "meta": {
+    "processedAt": "2026-04-30T00:32:23.265904+00:00",
+    "totalItems": 5,
+    "isMockData": true,
+    "keyword": "エアコン 省エネ 冷暖房",
+    "slug": "air-conditioner"
+  },
+  "pageMeta": {
+    "title": "エアコンおすすめ比較ランキング【2026年最新版】",
+    "description": "2026年最新のエアコンを徹底比較。畳数・省エネ・APF・価格・レビューから選ぶべき1台がわかります。ダイキン・パナソニック・日立・三菱電機など人気メーカーを網羅。",
+    "h1": "エアコンおすすめ比較ランキング2026年版",
+    "canonicalUrl": "https://my-only-fragrance-gos.vercel.app/air-conditioner",
+    "updatedAt": "2026-04-30"
+  },
+  "jsonLd": {
+    "faqPage": {
+      "@type": "FAQPage"
+    },
+    "breadcrumb": {
+      "@type": "BreadcrumbList"
+    }
+  },
+  "ranking": [
+    {
+      "rank": 1,
+      "itemName": "ダイキン AN-563ARP-W うるさらX エアコン 18畳 省エネ達成率130% APF8.3",
+      "itemPrice": 289800,
+      "itemUrl": "https://hb.afl.rakuten.co.jp/hgc/mock/MOCK0001/?pc=https%3A%2F%2Fitem.rakuten.co.jp%2Fmock-shop%2FMOCK0001%2F",
+      "imageUrl": "https://thumbnail.image.rakuten.co.jp/@0_mall/mock-shop/cabinet/air-conditioner-MOCK0001.jpg",
+      "reviewAverage": 4.71,
+      "reviewCount": 1432,
+      "aeoScore": 23.55,
+      "brand": "ダイキン",
+      "specs": {
+        "tatami": 18,
+        "energy_saving_pct": 130,
+        "apf": 8.3
+      },
+      "useCases": [
+        "高評価"
+      ],
+      "jsonLd": {}
+    },
+    {
+      "rank": 2,
+      "itemName": "パナソニック CS-X403D2 エオリア エアコン 14畳 フィルター自動掃除 APF7.9",
+      "itemPrice": 189800,
+      "itemUrl": "https://hb.afl.rakuten.co.jp/hgc/mock/MOCK0002/?pc=https%3A%2F%2Fitem.rakuten.co.jp%2Fmock-shop%2FMOCK0002%2F",
+      "imageUrl": "https://thumbnail.image.rakuten.co.jp/@0_mall/mock-shop/cabinet/air-conditioner-MOCK0002.jpg",
+      "reviewAverage": 4.65,
+      "reviewCount": 2156,
+      "aeoScore": 23.15,
+      "brand": "パナソニック",
+      "specs": {
+        "tatami": 14,
+        "energy_saving_pct": 120,
+        "apf": 7.9
+      },
+      "useCases": [
+        "高評価"
+      ],
+      "jsonLd": {}
+    },
+    {
+      "rank": 3,
+      "itemName": "日立 RAS-X40N2 白くまくん エアコン 14畳 省エネ達成率135% APF8.0",
+      "itemPrice": 199800,
+      "itemUrl": "https://hb.afl.rakuten.co.jp/hgc/mock/MOCK0003/?pc=https%3A%2F%2Fitem.rakuten.co.jp%2Fmock-shop%2FMOCK0003%2F",
+      "imageUrl": "https://thumbnail.image.rakuten.co.jp/@0_mall/mock-shop/cabinet/air-conditioner-MOCK0003.jpg",
+      "reviewAverage": 4.68,
+      "reviewCount": 987,
+      "aeoScore": 23.2,
+      "brand": "日立",
+      "specs": {
+        "tatami": 14,
+        "energy_saving_pct": 135,
+        "apf": 8.0
+      },
+      "useCases": [
+        "高評価"
+      ],
+      "jsonLd": {}
+    },
+    {
+      "rank": 4,
+      "itemName": "三菱電機 MSZ-ZW403S-W霧ヶ峰 エアコン 14畳 ムーブアイ APF7.8",
+      "itemPrice": 179800,
+      "itemUrl": "https://hb.afl.rakuten.co.jp/hgc/mock/MOCK0004/?pc=https%3A%2F%2Fitem.rakuten.co.jp%2Fmock-shop%2FMOCK0004%2F",
+      "imageUrl": "https://thumbnail.image.rakuten.co.jp/@0_mall/mock-shop/cabinet/air-conditioner-MOCK0004.jpg",
+      "reviewAverage": 4.63,
+      "reviewCount": 1543,
+      "aeoScore": 22.85,
+      "brand": "三菱電機",
+      "specs": {
+        "tatami": 14,
+        "energy_saving_pct": 125,
+        "apf": 7.8
+      },
+      "useCases": [
+        "高評価"
+      ],
+      "jsonLd": {}
+    },
+    {
+      "rank": 5,
+      "itemName": "富士通 AS-Z403N2W ノクリア Zシリーズ エアコン 14畳 省エネ APF7.7",
+      "itemPrice": 159800,
+      "itemUrl": "https://hb.afl.rakuten.co.jp/hgc/mock/MOCK0005/?pc=https%3A%2F%2Fitem.rakuten.co.jp%2Fmock-shop%2FMOCK0005%2F",
+      "imageUrl": "https://thumbnail.image.rakuten.co.jp/@0_mall/mock-shop/cabinet/air-conditioner-MOCK0005.jpg",
+      "reviewAverage": 4.57,
+      "reviewCount": 876,
+      "aeoScore": 22.45,
+      "brand": "富士通ゼネラル",
+      "specs": {
+        "tatami": 14,
+        "energy_saving_pct": 118,
+        "apf": 7.7
+      },
+      "useCases": [
+        "高評価"
+      ],
+      "jsonLd": {}
+    }
+  ],
+  "faq": [
+    {
+      "question": "エアコンのおすすめランキング1位はどれですか？",
+      "answer": "レビュー数と評価を総合したランキング1位はダイキン AN-563ARPです。"
+    },
+    {
+      "question": "エアコンの対応畳数はどう選べばいいですか？",
+      "answer": "部屋の畳数に対応した機種を選ぶのが基本です。断熱性の低い古い建物や日当たりの良い部屋は1~2段階大きい機種を選ぶと快適です。"
+    },
+    {
+      "question": "APFとは何ですか？数値が高いほど良いですか？",
+      "answer": "APF（通年エネルギー消費効率）は年間を通じたエネルギー効率の指標です。数値が高いほど省エネ性能が高いことを意味します。"
+    },
+    {
+      "question": "エアコンの工事費の目安はいくらですか？",
+      "answer": "標準工事費は15,000〜25,000円程度です。配管延長・穴あけが必要な場合は追加費用が発生します。"
+    },
+    {
+      "question": "エアコンの人気メーカーはどこですか？",
+      "answer": "ダイキン・パナソニック・日立・三菱電機・富士通ゼネラルが人気上位です。"
+    }
+  ],
+  "categories": {},
+  "summary": {
+    "topPick": "ダイキン AN-563ARP-W うるさらX エアコン 18畳 省エネ達成率130% APF8.3",
+    "totalReviewed": 5,
+    "priceRange": {
+      "min": 159800,
+      "max": 289800
+    },
+    "brands": [
+      "ダイキン",
+      "パナソニック",
+      "日立",
+      "三菱電機",
+      "富士通ゼネラル"
+    ]
+  }
+}

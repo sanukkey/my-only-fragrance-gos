@@ -1,0 +1,163 @@
+{
+  "meta": {
+    "processedAt": "2026-04-30T00:32:23.263303+00:00",
+    "totalItems": 5,
+    "isMockData": true,
+    "keyword": "ロボット掃除機",
+    "slug": "robot-cleaner"
+  },
+  "pageMeta": {
+    "title": "ロボット掃除機おすすめ比較ランキング【2026年最新版】",
+    "description": "2026年最新のロボット掃除機を徹底比較。吸引力・マッピング・自動ゴミ収集・価格・レビューから選ぶべき1台がわかります。Roborock・iRobot・Eufyなど人気ブランドを網羅。",
+    "h1": "ロボット掃除機おすすめ比較ランキング2026年版",
+    "canonicalUrl": "https://my-only-fragrance-gos.vercel.app/robot-cleaner",
+    "updatedAt": "2026-04-30"
+  },
+  "jsonLd": {
+    "faqPage": {
+      "@type": "FAQPage"
+    },
+    "breadcrumb": {
+      "@type": "BreadcrumbList"
+    }
+  },
+  "ranking": [
+    {
+      "rank": 1,
+      "itemName": "Roborock S8 MaxV Ultra ロボット掃除機 吸引力10000Pa 自動ゴミ収集 マッピング機能",
+      "itemPrice": 179800,
+      "itemUrl": "https://hb.afl.rakuten.co.jp/hgc/mock/MOCK0001/?pc=https%3A%2F%2Fitem.rakuten.co.jp%2Fmock-shop%2FMOCK0001%2F",
+      "imageUrl": "https://thumbnail.image.rakuten.co.jp/@0_mall/mock-shop/cabinet/robot-cleaner-MOCK0001.jpg",
+      "reviewAverage": 4.71,
+      "reviewCount": 1243,
+      "aeoScore": 23.55,
+      "brand": "Roborock",
+      "specs": {
+        "suction_pa": 10000,
+        "coverage_sqm": 200,
+        "auto_dust": true
+      },
+      "useCases": [
+        "高評価"
+      ],
+      "jsonLd": {}
+    },
+    {
+      "rank": 2,
+      "itemName": "iRobot Roomba j9+ ロボット掃除機 自動ゴミ収集 スマートマッピング ペット対応",
+      "itemPrice": 139800,
+      "itemUrl": "https://hb.afl.rakuten.co.jp/hgc/mock/MOCK0002/?pc=https%3A%2F%2Fitem.rakuten.co.jp%2Fmock-shop%2FMOCK0002%2F",
+      "imageUrl": "https://thumbnail.image.rakuten.co.jp/@0_mall/mock-shop/cabinet/robot-cleaner-MOCK0002.jpg",
+      "reviewAverage": 4.58,
+      "reviewCount": 2156,
+      "aeoScore": 22.8,
+      "brand": "iRobot",
+      "specs": {
+        "suction_pa": null,
+        "coverage_sqm": 200,
+        "auto_dust": true
+      },
+      "useCases": [
+        "高評価"
+      ],
+      "jsonLd": {}
+    },
+    {
+      "rank": 3,
+      "itemName": "Eufy RoboVac X9 Pro ロボット掃除機 吸引力5000Pa 水拭き自動洗浄",
+      "itemPrice": 89800,
+      "itemUrl": "https://hb.afl.rakuten.co.jp/hgc/mock/MOCK0003/?pc=https%3A%2F%2Fitem.rakuten.co.jp%2Fmock-shop%2FMOCK0003%2F",
+      "imageUrl": "https://thumbnail.image.rakuten.co.jp/@0_mall/mock-shop/cabinet/robot-cleaner-MOCK0003.jpg",
+      "reviewAverage": 4.62,
+      "reviewCount": 987,
+      "aeoScore": 22.9,
+      "brand": "Eufy",
+      "specs": {
+        "suction_pa": 5000,
+        "coverage_sqm": 200,
+        "auto_dust": true
+      },
+      "useCases": [
+        "高評価"
+      ],
+      "jsonLd": {}
+    },
+    {
+      "rank": 4,
+      "itemName": "Ecovacs DEEBOT T30S COMBO ロボット掃除機 吸引力11000Pa マッピング 拭き掃除",
+      "itemPrice": 129800,
+      "itemUrl": "https://hb.afl.rakuten.co.jp/hgc/mock/MOCK0004/?pc=https%3A%2F%2Fitem.rakuten.co.jp%2Fmock-shop%2FMOCK0004%2F",
+      "imageUrl": "https://thumbnail.image.rakuten.co.jp/@0_mall/mock-shop/cabinet/robot-cleaner-MOCK0004.jpg",
+      "reviewAverage": 4.55,
+      "reviewCount": 634,
+      "aeoScore": 22.45,
+      "brand": "Ecovacs",
+      "specs": {
+        "suction_pa": 11000,
+        "coverage_sqm": 300,
+        "auto_dust": true
+      },
+      "useCases": [
+        "高評価"
+      ],
+      "jsonLd": {}
+    },
+    {
+      "rank": 5,
+      "itemName": "Roborock Q8 Max+ ロボット掃除機 吸引力5500Pa 自動ゴミ収集 LiDARマッピング",
+      "itemPrice": 79800,
+      "itemUrl": "https://hb.afl.rakuten.co.jp/hgc/mock/MOCK0005/?pc=https%3A%2F%2Fitem.rakuten.co.jp%2Fmock-shop%2FMOCK0005%2F",
+      "imageUrl": "https://thumbnail.image.rakuten.co.jp/@0_mall/mock-shop/cabinet/robot-cleaner-MOCK0005.jpg",
+      "reviewAverage": 4.67,
+      "reviewCount": 812,
+      "aeoScore": 22.95,
+      "brand": "Roborock",
+      "specs": {
+        "suction_pa": 5500,
+        "coverage_sqm": 200,
+        "auto_dust": true
+      },
+      "useCases": [
+        "高評価"
+      ],
+      "jsonLd": {}
+    }
+  ],
+  "faq": [
+    {
+      "question": "ロボット掃除機のおすすめランキング1位はどれですか？",
+      "answer": "レビュー数と評価を総合したランキング1位はRoborock S8 MaxV Ultraです。"
+    },
+    {
+      "question": "ロボット掃除機の吸引力はどれくらいあれば十分ですか？",
+      "answer": "フローリングのみなら2000Pa前後、カーペットがある場合は3000Pa以上、ペットの毛が多い家庭では5000Pa以上を目安にしてください。"
+    },
+    {
+      "question": "自動ゴミ収集機能付きとそうでないものの違いは？",
+      "answer": "自動ゴミ収集機能付きは掃除後に自動でゴミを収集ステーションへ移送するため、毎回ダストボックスを空にする手間がありません。"
+    },
+    {
+      "question": "ロボット掃除機のマッピング機能は必要ですか？",
+      "answer": "マッピング機能（LiDARやカメラ）があると間取りを学習して効率的に清掃します。家具の多い部屋や複数の部屋を掃除する場合は特に有効です。"
+    },
+    {
+      "question": "ロボット掃除機は何畳まで対応できますか？",
+      "answer": "多くのモデルは1回の充電で100〜200㎡（約60〜120畳）に対応します。"
+    }
+  ],
+  "categories": {},
+  "summary": {
+    "topPick": "Roborock S8 MaxV Ultra ロボット掃除機 吸引力10000Pa 自動ゴミ収集 マッピング機能",
+    "totalReviewed": 5,
+    "priceRange": {
+      "min": 79800,
+      "max": 179800
+    },
+    "brands": [
+      "Roborock",
+      "iRobot",
+      "Eufy",
+      "Ecovacs"
+    ]
+  }
+}

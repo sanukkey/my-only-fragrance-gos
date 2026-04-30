@@ -1,0 +1,164 @@
+{
+  "meta": {
+    "processedAt": "2026-04-30T00:32:23.264123+00:00",
+    "totalItems": 5,
+    "isMockData": true,
+    "keyword": "衣類乾燥機",
+    "slug": "clothes-dryer"
+  },
+  "pageMeta": {
+    "title": "衣類乾燥機おすすめ比較ランキング【2026年最新版】",
+    "description": "2026年最新の衣類乾燥機を徹底比較。ヒートポンプ・ヒーター・ガス式の違いや乾燥容量・電気代・レビューから選ぶべき1台がわかります。",
+    "h1": "衣類乾燥機おすすめ比較ランキング2026年版",
+    "canonicalUrl": "https://my-only-fragrance-gos.vercel.app/clothes-dryer",
+    "updatedAt": "2026-04-30"
+  },
+  "jsonLd": {
+    "faqPage": {
+      "@type": "FAQPage"
+    },
+    "breadcrumb": {
+      "@type": "BreadcrumbList"
+    }
+  },
+  "ranking": [
+    {
+      "rank": 1,
+      "itemName": "パナソニック NH-DV80G2 ヒートポンプ 衣類乾燥機 乾燥容量8kg 省エネ",
+      "itemPrice": 189800,
+      "itemUrl": "https://hb.afl.rakuten.co.jp/hgc/mock/MOCK0001/?pc=https%3A%2F%2Fitem.rakuten.co.jp%2Fmock-shop%2FMOCK0001%2F",
+      "imageUrl": "https://thumbnail.image.rakuten.co.jp/@0_mall/mock-shop/cabinet/clothes-dryer-MOCK0001.jpg",
+      "reviewAverage": 4.73,
+      "reviewCount": 892,
+      "aeoScore": 23.65,
+      "brand": "パナソニック",
+      "specs": {
+        "dry_kg": 8,
+        "method": "ヒートポンプ",
+        "power_w": 1500
+      },
+      "useCases": [
+        "高評価"
+      ],
+      "jsonLd": {}
+    },
+    {
+      "rank": 2,
+      "itemName": "日立 DE-N60WV ビッグドラム 衣類乾燥機 乾燥容量6kg ヒートポンプ",
+      "itemPrice": 129800,
+      "itemUrl": "https://hb.afl.rakuten.co.jp/hgc/mock/MOCK0002/?pc=https%3A%2F%2Fitem.rakuten.co.jp%2Fmock-shop%2FMOCK0002%2F",
+      "imageUrl": "https://thumbnail.image.rakuten.co.jp/@0_mall/mock-shop/cabinet/clothes-dryer-MOCK0002.jpg",
+      "reviewAverage": 4.61,
+      "reviewCount": 1243,
+      "aeoScore": 22.95,
+      "brand": "日立",
+      "specs": {
+        "dry_kg": 6,
+        "method": "ヒートポンプ",
+        "power_w": 1300
+      },
+      "useCases": [
+        "高評価"
+      ],
+      "jsonLd": {}
+    },
+    {
+      "rank": 3,
+      "itemName": "シャープ ES-D6G-S ドラム式 衣類乾燥機 乾燥6kg プラズマクラスター",
+      "itemPrice": 109800,
+      "itemUrl": "https://hb.afl.rakuten.co.jp/hgc/mock/MOCK0003/?pc=https%3A%2F%2Fitem.rakuten.co.jp%2Fmock-shop%2FMOCK0003%2F",
+      "imageUrl": "https://thumbnail.image.rakuten.co.jp/@0_mall/mock-shop/cabinet/clothes-dryer-MOCK0003.jpg",
+      "reviewAverage": 4.55,
+      "reviewCount": 756,
+      "aeoScore": 22.55,
+      "brand": "シャープ",
+      "specs": {
+        "dry_kg": 6,
+        "method": "ヒートポンプ",
+        "power_w": 1300
+      },
+      "useCases": [
+        "高評価"
+      ],
+      "jsonLd": {}
+    },
+    {
+      "rank": 4,
+      "itemName": "リンナイ RDT-80A ガス衣類乾燥機 乾燥容量8kg 乾太くん",
+      "itemPrice": 89800,
+      "itemUrl": "https://hb.afl.rakuten.co.jp/hgc/mock/MOCK0004/?pc=https%3A%2F%2Fitem.rakuten.co.jp%2Fmock-shop%2FMOCK0004%2F",
+      "imageUrl": "https://thumbnail.image.rakuten.co.jp/@0_mall/mock-shop/cabinet/clothes-dryer-MOCK0004.jpg",
+      "reviewAverage": 4.82,
+      "reviewCount": 3421,
+      "aeoScore": 23.8,
+      "brand": "リンナイ",
+      "specs": {
+        "dry_kg": 8,
+        "method": "ガス式",
+        "power_w": null
+      },
+      "useCases": [
+        "高評価"
+      ],
+      "jsonLd": {}
+    },
+    {
+      "rank": 5,
+      "itemName": "東芝 ED-607 ヒーター式 衣類乾燥機 乾燥6kg コンパクト",
+      "itemPrice": 64800,
+      "itemUrl": "https://hb.afl.rakuten.co.jp/hgc/mock/MOCK0005/?pc=https%3A%2F%2Fitem.rakuten.co.jp%2Fmock-shop%2FMOCK0005%2F",
+      "imageUrl": "https://thumbnail.image.rakuten.co.jp/@0_mall/mock-shop/cabinet/clothes-dryer-MOCK0005.jpg",
+      "reviewAverage": 4.48,
+      "reviewCount": 987,
+      "aeoScore": 22.0,
+      "brand": "東芝",
+      "specs": {
+        "dry_kg": 6,
+        "method": "ヒーター",
+        "power_w": 1200
+      },
+      "useCases": [
+        "高評価"
+      ],
+      "jsonLd": {}
+    }
+  ],
+  "faq": [
+    {
+      "question": "衣類乾燥機のおすすめランキング1位はどれですか？",
+      "answer": "レビュー数と評価を総合したランキング1位はパナソニック NH-DV80G2です。"
+    },
+    {
+      "question": "ヒートポンプ式とヒーター式の乾燥機、どちらがおすすめですか？",
+      "answer": "電気代を重視するならヒートポンプ式がおすすめ。ヒーター式の約1/3の電力で乾燥でき、衣類へのダメージも少ないです。"
+    },
+    {
+      "question": "衣類乾燥機の容量はどれくらいが必要ですか？",
+      "answer": "一人暮らしなら3~5kg、夫婦2人なら5~6kg、4人家族なら6~8kg以上が目安です。"
+    },
+    {
+      "question": "乾燥機を使うと衣類が縮みませんか？",
+      "answer": "ヒートポンプ式は低温乾燥のため縮みにくく、化繊・タオル・シーツなどは問題なく使えます。"
+    },
+    {
+      "question": "衣類乾燥機の電気代はどのくらいですか？",
+      "answer": "ヒートポンプ式で1回約30~60円、ヒーター式で約100~150円程度です。"
+    }
+  ],
+  "categories": {},
+  "summary": {
+    "topPick": "パナソニック NH-DV80G2 ヒートポンプ 衣類乾燥機 乾燥容量8kg 省エネ",
+    "totalReviewed": 5,
+    "priceRange": {
+      "min": 64800,
+      "max": 189800
+    },
+    "brands": [
+      "パナソニック",
+      "日立",
+      "シャープ",
+      "リンナイ",
+      "東芝"
+    ]
+  }
+}

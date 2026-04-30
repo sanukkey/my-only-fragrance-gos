@@ -32,6 +32,9 @@ export default function InfoLayout({ children }: { children: React.ReactNode }) 
             <a href="/portable-power"       className="hover:text-gray-600">ポータブル電源</a>
             <a href="/drum-washing-machine"  className="hover:text-gray-600">ドラム式洗濯機</a>
             <a href="/refrigerator"         className="hover:text-gray-600">大型冷蔵庫</a>
+            <a href="/robot-cleaner"        className="hover:text-gray-600">ロボット掃除機</a>
+            <a href="/clothes-dryer"        className="hover:text-gray-600">衣類乾燥機</a>
+            <a href="/air-conditioner"      className="hover:text-gray-600">エアコン</a>
             <span className="text-gray-200">|</span>
             <a href="/about"   className="hover:text-gray-600">運営者情報</a>
             <a href="/privacy" className="hover:text-gray-600">プライバシーポリシー</a>

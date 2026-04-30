@@ -12,6 +12,9 @@ on:
       - 'data/portable-power/**'        # ポータブル電源データ更新
       - 'data/drum-washing-machine/**'  # ドラム式洗濯機データ更新
       - 'data/refrigerator/**'          # 大型冷蔵庫データ更新
+      - 'data/robot-cleaner/**'         # ロボット掃除機データ更新
+      - 'data/clothes-dryer/**'         # 衣類乾燥機データ更新
+      - 'data/air-conditioner/**'       # エアコンデータ更新
       - 'public/**'                     # 静的アセット変更
       - 'next.config.js'                # Next.js設定変更
       - 'vercel.json'                   # Vercel設定変更
